@@ -56,7 +56,19 @@ export class PostgresInputBatch extends InputBatch {
   }
 
   add(columnList: InlineColumnSpec[]) {
-    return super.addColumns(columnList);
+    return super.addColumn(columnList);
+  }
+
+  dropColumn(columnNames: string[]) {
+    return super.dropColumn(columnNames);
+  }
+
+  renameColumn(from: string, to: string) {
+    return super.renameColumn(from, to);
+  }
+
+  alterColumn(columnList: InlineColumnSpec[]) {
+    return super.alterColumn(columnList);
   }
 
   unique(columns: string[]) {

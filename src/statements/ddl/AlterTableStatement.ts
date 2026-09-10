@@ -23,13 +23,13 @@ interface AlterTableBaseStatement extends BaseStatement {
 }
 
 interface AlterAddColumn extends AlterTableBaseStatement {
-  op: "add_columns";
+  op: "add_column";
   columnList: InlineColumnSpec[];
 }
 
 interface AlterDropColumn extends AlterTableBaseStatement {
   op: "drop_column";
-  columnName: string;
+  columnNames: string[];
 }
 
 interface AlterRenameColumn extends AlterTableBaseStatement {
@@ -40,8 +40,7 @@ interface AlterRenameColumn extends AlterTableBaseStatement {
 
 interface AlterModifyColumn extends AlterTableBaseStatement {
   op: "modify_column";
-  columnName: string;
-  column: Column;
+  columnList: InlineColumnSpec[];
 }
 
 export interface AlterAddConstraint extends AlterTableBaseStatement {
@@ -61,12 +60,12 @@ interface AlterDropPrimaryKey extends AlterTableBaseStatement {
 type AlterTableBuilderState =
   | { state: "init" }
   | {
-      state: "add_columns";
+      state: "add_column";
       columnList: InlineColumnSpec[];
     }
-  | { state: "drop_column"; columnName: string }
+  | { state: "drop_column"; columnNames: string[] }
   | { state: "rename_column"; from: string; to: string }
-  | { state: "modify_column"; columnName: string; column: Column }
+  | { state: "modify_column"; columnList: InlineColumnSpec[] }
   | {
       state: "add_constraint";
       partial: Partial<ConstraintSpec>;
@@ -99,14 +98,14 @@ export class AlterTableBuilder implements StatementBuilder {
     this.state = next;
   }
 
-  addColumns(columnList: InlineColumnSpec[]) {
+  addColumn(columnList: InlineColumnSpec[]) {
     this.assertState("init");
-    this.transitionState({ state: "add_columns", columnList });
+    this.transitionState({ state: "add_column", columnList });
   }
 
-  dropColumn(columnName: string) {
+  dropColumn(columnNames: string[]) {
     this.assertState("init");
-    this.transitionState({ state: "drop_column", columnName });
+    this.transitionState({ state: "drop_column", columnNames });
   }
 
   renameColumn(from: string, to: string) {
@@ -114,9 +113,9 @@ export class AlterTableBuilder implements StatementBuilder {
     this.transitionState({ state: "rename_column", from, to });
   }
 
-  modifyColumn(columnName: string, column: Column) {
+  modifyColumn(columnList: InlineColumnSpec[]) {
     this.assertState("init");
-    this.transitionState({ state: "modify_column", columnName, column });
+    this.transitionState({ state: "modify_column", columnList });
   }
 
   dropConstraint(constraintName: string) {
@@ -297,10 +296,10 @@ export class AlterTableBuilder implements StatementBuilder {
 
   createStatement(): AlterTableStatement {
     switch (this.state.state) {
-      case "add_columns":
+      case "add_column":
         return {
           kind: "alter_table",
-          op: "add_columns",
+          op: "add_column",
           table: this.table,
           columnList: this.state.columnList,
         };
@@ -310,7 +309,7 @@ export class AlterTableBuilder implements StatementBuilder {
           kind: "alter_table",
           op: "drop_column",
           table: this.table,
-          columnName: this.state.columnName,
+          columnNames: this.state.columnNames,
         };
 
       case "rename_column":
@@ -327,8 +326,7 @@ export class AlterTableBuilder implements StatementBuilder {
           kind: "alter_table",
           op: "modify_column",
           table: this.table,
-          columnName: this.state.columnName,
-          column: this.state.column,
+          columnList: this.state.columnList,
         };
 
       case "add_constraint":

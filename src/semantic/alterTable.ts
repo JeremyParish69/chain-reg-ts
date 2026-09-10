@@ -21,6 +21,7 @@ import { type Column } from "../relational/Column.js";
 import { AddUniqueConstraintAction } from "../actions/AddUniqueConstraintAction.js";
 import { RenameColumnAction } from "../actions/RenameColumnAction.js";
 import { DropColumnAction } from "../actions/DropColumnAction.js";
+import { AlterColumnAction } from "../actions/AlterColumnAction.js";
 
 export function bindAlterTable(
   semantic: SemanticAnalyzer,
@@ -149,7 +150,7 @@ export function bindAlterTable(
     }
   } else if (stmt.op === "drop_primary_key") {
     stmtActions.push(new DropPrimaryKeyAction(dbName, tableName));
-  } else if (stmt.op === "add_columns") {
+  } else if (stmt.op === "add_column") {
     for (const columnSpec of stmt.columnList) {
       stmtActions.push(
         new AddColumnAction(
@@ -160,27 +161,52 @@ export function bindAlterTable(
         ),
       );
     }
-  }
-  // } else if (stmt.op === "rename_column") {
-  //   stmtActions.push(
-  //     new RenameColumnAction(
-  //       dbName,
-  //       tableName,
-  //       columnName,
-  //       newName,
-  //     ),
-  //   );
-  // } else if (stmt.op === "drop_column") {
-  //   stmtActions.push(
-  //     new DropColumnAction(
-  //       dbName,
-  //       tableName,
-  //       columnName,
-  //     ),
-  //   );
-  // }
+  } else if (stmt.op === "rename_column") {
+    table.columns.requireByName(stmt.from);
 
-  //TODO, add the remaining ops (rename column, drop column, etc.)
+    assertNewNameAvailable(stmt.to);
+    function assertNewNameAvailable(newName: string): void {
+      if (table.columns.getByName(newName) !== undefined) {
+        throw new Error(`Replacement column name ${newName} already taken`)
+      }
+    }
+
+    stmtActions.push(
+      new RenameColumnAction(
+        dbName,
+        tableName,
+        stmt.from,
+        stmt.to,
+      ),
+    );
+  } else if (stmt.op === "drop_column") {
+    for (const columnName of stmt.columnNames) {
+      table.columns.requireByName(columnName);
+
+      stmtActions.push(
+        new DropColumnAction(
+          dbName,
+          tableName,
+          columnName,
+        ),
+      );
+    }
+  } else if (stmt.op === "modify_column") {
+    for (const columnSpec of stmt.columnList) {
+      table.columns.requireByName(columnSpec.name);
+
+      stmtActions.push(
+        new AlterColumnAction(
+          dbName,
+          tableName,
+          columnSpec.name,
+          columnSpec.type,
+        ),
+      );
+    }
+  }
+
+  //TODO, add the remaining ops (rename table etc.)
 
   return stmtActions;
 }

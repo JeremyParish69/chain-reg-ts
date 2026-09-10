@@ -31,8 +31,6 @@ import {
 import type { UpdateInput } from "../types/UpdateInput.js";
 import type { RowView } from "../relational/RowView.js";
 import type { InsertInput } from "../types/InsertInput.js";
-import type { ExpressionNode } from "../ast/expression/ExpressionNode.js";
-import type { ColumnValue } from "../types/ColumnValue.js";
 import type { SelectInput } from "../types/SelectInput.js";
 
 export abstract class InputBatch {
@@ -265,7 +263,7 @@ export abstract class InputBatch {
     return this;
   }
 
-  protected addColumns(
+  protected addColumn(
     columnList: InlineColumnSpec[],
     fragment: string = "ADD COLUMN",
   ) {
@@ -273,7 +271,44 @@ export abstract class InputBatch {
     if (!(this.currentBuilder instanceof AlterTableBuilder)) {
       throw new Error(`Cannot call '${fragment}' outside of AlterTable`);
     }
-    this.currentBuilder.addColumns(columnList);
+    this.currentBuilder.addColumn(columnList);
+    return this;
+  }
+
+  protected dropColumn(
+    columnNames: string[],
+    fragment: string = "DROP COLUMN",
+  ) {
+    this.assertAllowed("dropColumn", fragment);
+    if (!(this.currentBuilder instanceof AlterTableBuilder)) {
+      throw new Error(`Cannot call '${fragment}' outside of AlterTable`);
+    }
+    this.currentBuilder.dropColumn(columnNames);
+    return this;
+  }
+
+  protected renameColumn(
+    from: string,
+    to: string,
+    fragment: string = "RENAME COLUMN",
+  ) {
+    this.assertAllowed("renameColumn", fragment);
+    if (!(this.currentBuilder instanceof AlterTableBuilder)) {
+      throw new Error(`Cannot call '${fragment}' outside of AlterTable`);
+    }
+    this.currentBuilder.renameColumn(from, to);
+    return this;
+  }
+
+  protected alterColumn(
+    columnList: InlineColumnSpec[],
+    fragment: string = "ALTER COLUMN",
+  ) {
+    this.assertAllowed("alterColumn", fragment);
+    if (!(this.currentBuilder instanceof AlterTableBuilder)) {
+      throw new Error(`Cannot call '${fragment}' outside of AlterTable`);
+    }
+    this.currentBuilder.modifyColumn(columnList);
     return this;
   }
 
