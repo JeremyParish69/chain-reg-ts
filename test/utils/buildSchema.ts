@@ -28,11 +28,11 @@ export function createTestIdService(): IdService {
 export function createTableTestSpec(
   name: string,
   columns?: Record<string, Omit<InlineColumnSpec, "name">> | InlineColumnSpec[],
-  constraints?: Record<string, ConstraintSpec>,
+  constraints?: Record<string, ConstraintSpec> | ConstraintSpec[],
 ):  [
       string,
       InlineColumnSpec[] | undefined,
-      Record<string, ConstraintSpec> | undefined
+      ConstraintSpec[] | undefined,
     ]
 {
   const columnList = Array.isArray(columns)
@@ -40,11 +40,10 @@ export function createTableTestSpec(
     : columnSchemaToList(columns)
   ;
 
-  const constraintList = constraints;
-  // const constraintList = Array.isArray(constraints)
-  //   ? constraints
-  //   : constraintSchemaToList(constraints)
-  // ; 
+  const constraintList = Array.isArray(constraints)
+    ? constraints
+    : constraintSchemaToList(constraints)
+  ; 
 
   return [name, columnList, constraintList];
 }
@@ -56,6 +55,17 @@ function columnSchemaToList(
   const specs: InlineColumnSpec[] = []; 
   for (const [name, spec] of Object.entries(schema)) {
     specs.push({name, ...spec});
+  }
+  return specs;
+}
+
+function constraintSchemaToList(
+  schema?: Record<string, ConstraintSpec>,
+): ConstraintSpec[] {
+  if (!schema) return [];
+  const specs: ConstraintSpec[] = []; 
+  for (const [name, spec] of Object.entries(schema)) {
+    specs.push({ ...spec, name});
   }
   return specs;
 }

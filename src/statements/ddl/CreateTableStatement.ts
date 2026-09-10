@@ -8,7 +8,7 @@ export interface CreateTableStatement extends BaseStatement {
   table: string;
 
   columnList?: InlineColumnSpec[];
-  constraintSchema?: Record<string, ConstraintSpec>;
+  constraintList?: ConstraintSpec[],
 
   select?: SelectStatement;
 }
@@ -19,7 +19,7 @@ export class CreateTableBuilder implements StatementBuilder {
   constructor(
     private table: string,
     private columns?: InlineColumnSpec[],
-    private constraints?: Record<string, ConstraintSpec>,
+    private constraints?: ConstraintSpec[],
   ) {}
 
   as(query: SelectStatement) {
@@ -45,7 +45,7 @@ export class CreateTableBuilder implements StatementBuilder {
       kind: "create_table",
       table: this.table,
       columnList: this.columns,
-      constraintSchema: this.constraints,
+      constraintList: this.constraints,
       select: this.selectStatement,
     };
   }

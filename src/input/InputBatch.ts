@@ -160,7 +160,7 @@ export abstract class InputBatch {
   protected createTable(
     name: string,
     columnList?: InlineColumnSpec[],
-    constraintSchema?: Record<string, ConstraintSpec>,
+    constraintList?: ConstraintSpec[],
     fragment: string = "CREATE TABLE",
   ) {
     this.assertAllowed("createTable", fragment);
@@ -169,35 +169,13 @@ export abstract class InputBatch {
     this.currentBuilder = new CreateTableBuilder(
       name,
       columnList,
-      constraintSchema,
+      constraintList,
     );
 
     this.pauseCurrentBuilder();
 
     return this;
   }
-
-  //TODO, remove if above working
-  // protected createTable(
-  //   name: string,
-  //   columnList: InlineColumnSpec[],
-  //   //columnSchema?: Record<string, InlineColumnSpec>,
-  //   constraintSchema?: Record<string, ConstraintSpec>,
-  //   fragment: string = "CREATE TABLE",
-  // ) {
-  //   this.assertAllowed("createTable", fragment);
-  //   this.finalizePreviousStatement();
-
-  //   this.currentBuilder = new CreateTableBuilder(
-  //     name,
-  //     columnSchema,
-  //     constraintSchema,
-  //   );
-
-  //   this.pauseCurrentBuilder();
-
-  //   return this;
-  // }
 
   protected as(
     query: QueryStatement,
@@ -289,7 +267,8 @@ export abstract class InputBatch {
 
   protected addColumn(
     columnName: string,
-    inlineColumnSpec: InlineColumnSpec,
+    inlineColumnSpec: InlineColumnSpec, // TODO
+    //columnList: InlineColumnSpec[],
     fragment: string = "ADD COLUMN",
   ) {
     this.assertAllowed("addColumn", fragment);

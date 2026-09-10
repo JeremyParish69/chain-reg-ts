@@ -66,20 +66,6 @@ export function bindCreateTable(
     ctasColumnListOverridesQueryColumns: boolean,
     ctasColumnListMustMatchQueryColumnCount: boolean,
   ): ColumnSpec[] {
-    //const columnsFromDefinition: ColumnSpec[] = columnList ?? [];
-    //  ? getColumnSpecsFromColumnSchema(columnList)
-    //  : [];
-    // function getColumnSpecsFromColumnSchema(
-    //   columnList: InlineColumnSpec[]
-    // ): ColumnSpec[] {
-    //   const columnSpecs: ColumnSpec[] = [];
-    //   for (const [colName, inlineColSpec] of Object.entries(columnList)) {
-    //     columnSpecs.push({ name: colName, ...inlineColSpec });
-    //   }
-    //   return columnSpecs;
-    // }
-    // TODO, remove
-
     if (!queryPlan) {
       return columnList ?? [];
     }
@@ -103,87 +89,6 @@ export function bindCreateTable(
       ctasColumnListOverridesQueryColumns,
       ctasColumnListMustMatchQueryColumnCount,
     );
-    //TODO, delete? because it was replaced just below
-    // function unifyColumnSpecSets(
-    //   columnsFromDefinition: ColumnSpec[],
-    //   columnsFromQuery: ColumnSpec[],
-    //   ctasDefinedColumnListOverridesQueryColumns: boolean,
-    // ): ColumnSpec[] {
-    //   assertNoDuplicateColumnNames(columnsFromDefinition);
-    //   assertNoDuplicateColumnNames(columnsFromQuery);
-
-    //   const columnSpecs: ColumnSpec[] = [];
-    //   const addedColumnNames = new Set<string>();
-
-    //   if (!ctasDefinedColumnListOverridesQueryColumns) {
-    //     for (const definitionColumn of columnsFromDefinition) {
-    //       const definitionName = normalizeIdentifier(definitionColumn.name);
-    //       addedColumnNames.add(definitionName);
-
-    //       const queryColumn = columnsFromQuery.find(
-    //         (column) =>
-    //           normalizeIdentifier(column.name) === definitionName,
-    //       );
-
-    //       if (!queryColumn) {
-    //         columnSpecs.push(definitionColumn);
-    //         continue;
-    //       }
-
-    //       columnSpecs.push(
-    //         unifyColumnSpecs(definitionColumn, queryColumn),
-    //       );
-    //     }
-
-    //     for (const queryColumn of columnsFromQuery) {
-    //       if (!addedColumnNames.has(
-    //         normalizeIdentifier(queryColumn.name)
-    //       )) {
-    //         columnSpecs.push(queryColumn);
-    //       }
-    //     }
-    //   } else {
-    //     for (const [i, queryColumn] of columnsFromQuery.entries()) {
-    //       if (i < columnsFromDefinition.length) {
-    //         columnSpecs.push(
-    //           unifyColumnSpecs(
-    //             columnsFromDefinition[i],
-    //             queryColumn,
-    //           )
-    //         );
-    //       } else {
-    //         columnSpecs.push(queryColumn);
-    //       }
-    //     }
-    //   }
-
-    //   return columnSpecs;
-
-    //   function unifyColumnSpecs(
-    //     definitionColumnSpec: ColumnSpec,
-    //     queryColumnSpec: ColumnSpec,
-    //   ): ColumnSpec {
-    //     if (!isAssignable(
-    //       queryColumnSpec.type,
-    //       definitionColumnSpec.type,
-    //     )) {
-    //       throw new Error(`Cannot assign type:
-    //         ${queryColumnSpec.type} to type:
-    //         ${definitionColumnSpec.type}`);
-    //     }
-
-    //     const nullable: boolean | undefined =
-    //       definitionColumnSpec.nullable !== undefined
-    //         ? definitionColumnSpec.nullable
-    //         : queryColumnSpec.nullable
-
-
-    //     return {
-    //       ...definitionColumnSpec,
-    //       nullable,
-    //     };
-    //   }
-    // }
     function unifyColumnSpecSets(
       columnsFromDefinition: ColumnSpec[],
       columnsFromQuery: ColumnSpec[],
@@ -322,12 +227,12 @@ export function bindCreateTable(
 
   const constraintSpecs: ConstraintSpec[] = getConstraintSpecsForStatement(
     stmt.columnList,
-    stmt.constraintSchema,
+    stmt.constraintList,
     ctx.rules.ddl.supportsInlineForeignKeys,
   );
   function getConstraintSpecsForStatement(
     inlineColumnList: InlineColumnSpec[] | undefined,
-    tableConstraintSchema: Record<string, ConstraintSpec> | undefined,
+    constraintList: ConstraintSpec[] | undefined,
     supportsInlineForeignKeys: boolean,
   ): ConstraintSpec[] {
     const inlineConstraints = inlineColumnList
@@ -364,23 +269,7 @@ export function bindCreateTable(
       }
     }
 
-    const tableConstraints = tableConstraintSchema
-      ? getConstraintSpecsFromTableConstraints(tableConstraintSchema)
-      : [];
-    function getConstraintSpecsFromTableConstraints(
-      tableConstraintSchema: Record<string, ConstraintSpec>
-    ): ConstraintSpec[] {
-      const specs: ConstraintSpec[] = []; 
-      for (const [name, constraintSpec] of Object.entries(tableConstraintSchema)) {
-        specs.push(
-          {
-            ...constraintSpec,
-            name,
-          }
-        );
-      }
-      return specs;
-    }
+    const tableConstraints = constraintList ?? [];
     assertNoDuplicateConstraintNames(tableConstraints);
 
     const constraintSpecs: ConstraintSpec[] = [

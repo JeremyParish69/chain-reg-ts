@@ -35,9 +35,9 @@ export class PostgresInputBatch extends InputBatch {
   createTable(
     table: string,
     columnList?: InlineColumnSpec[],
-    constraintSchema?: Record<string, ConstraintSpec>,
+    constraintList?: ConstraintSpec[],
   ) {
-    return super.createTable(table, columnList, constraintSchema);
+    return super.createTable(table, columnList, constraintList);
   }
 
   as(
