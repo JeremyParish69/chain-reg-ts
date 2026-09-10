@@ -157,27 +157,9 @@ export abstract class InputBatch {
     return this;
   }
 
-  // protected createTable(
-  //   name: string,
-  //   columnSchema: Record<string, InlineColumnSpec>,
-  //   constraintSchema: Record<string, ConstraintSpec>,
-  //   fragment: string = "CREATE TABLE",
-  // ) {
-  //   this.assertAllowed("createTable", fragment);
-  //   this.finalizePreviousStatement();
-  //   this.currentBuilder = new CreateTableBuilder(
-  //     name,
-  //     columnSchema,
-  //     constraintSchema,
-  //   );
-  //   this.finalizePreviousStatement();
-  //   return this;
-  // }
-
   protected createTable(
     name: string,
-    //columns: InlineColumnSpec[], // TODO
-    columnSchema?: Record<string, InlineColumnSpec>,
+    columnList?: InlineColumnSpec[],
     constraintSchema?: Record<string, ConstraintSpec>,
     fragment: string = "CREATE TABLE",
   ) {
@@ -186,7 +168,7 @@ export abstract class InputBatch {
 
     this.currentBuilder = new CreateTableBuilder(
       name,
-      columnSchema,
+      columnList,
       constraintSchema,
     );
 
@@ -194,6 +176,28 @@ export abstract class InputBatch {
 
     return this;
   }
+
+  //TODO, remove if above working
+  // protected createTable(
+  //   name: string,
+  //   columnList: InlineColumnSpec[],
+  //   //columnSchema?: Record<string, InlineColumnSpec>,
+  //   constraintSchema?: Record<string, ConstraintSpec>,
+  //   fragment: string = "CREATE TABLE",
+  // ) {
+  //   this.assertAllowed("createTable", fragment);
+  //   this.finalizePreviousStatement();
+
+  //   this.currentBuilder = new CreateTableBuilder(
+  //     name,
+  //     columnSchema,
+  //     constraintSchema,
+  //   );
+
+  //   this.pauseCurrentBuilder();
+
+  //   return this;
+  // }
 
   protected as(
     query: QueryStatement,

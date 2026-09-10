@@ -3,6 +3,7 @@ import { CONSTRAINT_KIND } from '../../src/relational/ConstraintKind.js';
 import { createTestPostgresSql } from '../utils/engineHelpers.js';
 import { col } from '../../src/ast/dsl.js';
 import { SQL_DECIMAL, SQL_VARCHAR } from '../../src/types/SqlType.js';
+import { createTableTestSpec } from '../utils/buildSchema.js';
 
 describe("Integration::delete", () => {
   it("deletes a single row", () => {
@@ -12,7 +13,7 @@ describe("Integration::delete", () => {
 
     sql.useDatabase("DB1").execute();
 
-    sql.createTable("Users", {
+    sql.createTable(...createTableTestSpec("Users", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
@@ -22,7 +23,7 @@ describe("Integration::delete", () => {
         type: SQL_VARCHAR,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
     sql
       .insertInto("Users", ["Id", "Name"])
@@ -55,13 +56,13 @@ describe("Integration::delete", () => {
     sql.createDatabase("DB1").execute();
     sql.useDatabase("DB1").execute();
 
-    sql.createTable("Users", {
+    sql.createTable(...createTableTestSpec("Users", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
         primaryKey: true,
       },
-    }).execute();
+    })).execute();
 
     sql
       .insertInto("Users", ["Id"])
@@ -86,13 +87,13 @@ describe("Integration::delete", () => {
     sql.createDatabase("DB1").execute();
     sql.useDatabase("DB1").execute();
 
-    sql.createTable("Users", {
+    sql.createTable(...createTableTestSpec("Users", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
         primaryKey: true,
       },
-    }).execute();
+    })).execute();
 
     sql
       .insertInto("Users", ["Id"])
@@ -125,15 +126,15 @@ describe("Integration::delete", () => {
     sql.createDatabase("DB1").execute();
     sql.useDatabase("DB1").execute();
 
-    sql.createTable("Roles", {
+    sql.createTable(...createTableTestSpec("Roles", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
         primaryKey: true,
       },
-    }).execute();
+    })).execute();
 
-    sql.createTable("Users",
+    sql.createTable(...createTableTestSpec("Users",
       {
         RoleId: {
           type: SQL_DECIMAL,
@@ -150,7 +151,7 @@ describe("Integration::delete", () => {
           onDelete: "restrict",
         },
       }
-    ).execute();
+    )).execute();
 
     sql
       .insertInto("Roles", ["Id"])
@@ -178,15 +179,15 @@ describe("Integration::delete", () => {
     sql.createDatabase("DB1").execute();
     sql.useDatabase("DB1").execute();
 
-    sql.createTable("Roles", {
+    sql.createTable(...createTableTestSpec("Roles", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
         primaryKey: true,
       },
-    }).execute();
+    })).execute();
 
-    sql.createTable("Users",
+    sql.createTable(...createTableTestSpec("Users",
       {
         RoleId: {
           type: SQL_DECIMAL,
@@ -203,7 +204,7 @@ describe("Integration::delete", () => {
           onDelete: "cascade",
         },
       }
-    ).execute();
+    )).execute();
 
     sql
       .insertInto("Roles", ["Id"])

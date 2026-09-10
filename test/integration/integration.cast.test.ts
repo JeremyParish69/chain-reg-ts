@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { createTestPostgresSql } from '../utils/engineHelpers.ts';
 import { SQL_INTEGER, SQL_VARCHAR } from '../../src/types/SqlType.ts';
 import { cast, col } from '../../src/ast/dsl.ts';
+import { createTableTestSpec } from '../utils/buildSchema.ts';
 
 describe("Integration::cast", () => {
   it("casts an INSERT value to the target SQL type", () => {
@@ -10,7 +11,7 @@ describe("Integration::cast", () => {
     sql.createDatabase("DB1").execute();
     sql.useDatabase("DB1").execute();
 
-    sql.createTable("Users", {
+    sql.createTable(...createTableTestSpec("Users", {
       Id: {
         type: SQL_INTEGER,
         nullable: false,
@@ -20,7 +21,8 @@ describe("Integration::cast", () => {
         type: SQL_VARCHAR,
         nullable: false,
       },
-    }).execute();
+    }))
+    .execute();
 
     sql
       .insertInto("Users", ["Id", "Name"])
@@ -51,7 +53,7 @@ describe("Integration::cast", () => {
     sql.createDatabase("DB1").execute();
     sql.useDatabase("DB1").execute();
 
-    sql.createTable("Users", {
+    sql.createTable(...createTableTestSpec("Users", {
       Id: {
         type: SQL_INTEGER,
         nullable: false,
@@ -61,7 +63,7 @@ describe("Integration::cast", () => {
         type: SQL_VARCHAR,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
     sql
       .insertInto("Users", ["Id", "Name"])
@@ -95,7 +97,7 @@ describe("Integration::cast", () => {
     sql.createDatabase("DB1").execute();
     sql.useDatabase("DB1").execute();
 
-    sql.createTable("Users", {
+    sql.createTable(...createTableTestSpec("Users", {
       Id: {
         type: SQL_INTEGER,
         nullable: false,
@@ -105,7 +107,7 @@ describe("Integration::cast", () => {
         type: SQL_VARCHAR,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
     sql
       .insertInto("Users", ["Id", "Name"])
@@ -148,7 +150,7 @@ describe("Integration::cast", () => {
     sql.createDatabase("DB1").execute();
     sql.useDatabase("DB1").execute();
 
-    sql.createTable("Users", {
+    sql.createTable(...createTableTestSpec("Users", {
       Id: {
         type: SQL_INTEGER,
         nullable: false,
@@ -158,7 +160,7 @@ describe("Integration::cast", () => {
         type: SQL_VARCHAR,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
     sql
       .insertInto("Users", ["Id", "Name"])

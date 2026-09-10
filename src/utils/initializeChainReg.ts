@@ -212,14 +212,15 @@ function createTestDatabase() {
   sql.useDatabase("Test").execute();
   console.log("3");
   sql
-    .createTable("T1", {
-      C1: {
+    .createTable("T1", [
+      {
+        name: "C1",
         type: SQL_DECIMAL,
         unique: false,
         autoIncrementStart: 0,
         autoIncrementStep: 1,
       },
-    })
+    ])
     .execute();
   console.log("4");
   sql

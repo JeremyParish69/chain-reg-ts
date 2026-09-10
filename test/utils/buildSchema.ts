@@ -1,10 +1,10 @@
 import { Table, type TableId } from "../../src/relational/Table.js";
 import { Database, type DatabaseId } from "../../src/relational/Database.js";
-import { type ColumnSpec, type ColumnId } from "../../src/relational/Column.js";
+import { type ColumnSpec, type ColumnId, type InlineColumnSpec } from "../../src/relational/Column.js";
 import { type ForeignKeyId } from "../../src/relational/ForeignKey.js";
 import { type IndexSpec, type IndexId } from "../../src/relational/Index.js";
 import { type IdService } from "../../src/types/IdAllocator.js";
-import { type CheckSpec, type ForeignKeySpec } from "../../src/relational/Constraint.js";
+import { type CheckSpec, type ConstraintSpec, type ForeignKeySpec } from "../../src/relational/Constraint.js";
 import { type UniqueId } from "../../src/relational/Unique.js";
 import { type ResolvedDelete } from "../../src/types/ResolvedDelete.js";
 import { LiteralExpressionNode } from "../../src/ast/expression/LiteralExpressionNode.js";
@@ -23,6 +23,64 @@ export function createTestIdService(): IdService {
     nextUniqueId: () => nextId++ as UniqueId,
     nextForeignKeyId: () => nextId++ as ForeignKeyId,
   };
+}
+
+export function createTableTestSpec(
+  name: string,
+  columns?: Record<string, Omit<InlineColumnSpec, "name">> | InlineColumnSpec[],
+  constraints?: Record<string, ConstraintSpec>,
+):  [
+      string,
+      InlineColumnSpec[] | undefined,
+      Record<string, ConstraintSpec> | undefined
+    ]
+{
+  const columnList = Array.isArray(columns)
+    ? columns
+    : columnSchemaToList(columns)
+  ;
+
+  const constraintList = constraints;
+  // const constraintList = Array.isArray(constraints)
+  //   ? constraints
+  //   : constraintSchemaToList(constraints)
+  // ; 
+
+  return [name, columnList, constraintList];
+}
+
+function columnSchemaToList(
+  schema?: Record<string, Omit<InlineColumnSpec, "name">>,
+): InlineColumnSpec[] {
+  if (!schema) return [];
+  const specs: InlineColumnSpec[] = []; 
+  for (const [name, spec] of Object.entries(schema)) {
+    specs.push({name, ...spec});
+  }
+  return specs;
+}
+
+export function addColumnTestSpec(
+  name: string,
+  spec: Omit<InlineColumnSpec, "name"> | InlineColumnSpec,
+):  [
+      string,
+      InlineColumnSpec,
+    ]
+{
+  const columnSpec = "name" in spec
+    ? spec
+    : namelessColumnToSpec(name, spec)
+  ;
+
+  return [name, columnSpec];
+}
+
+function namelessColumnToSpec(
+  name: string,
+  spec: Omit<InlineColumnSpec, "name">,
+): InlineColumnSpec {
+  return { ...spec, name };
 }
 
 export function createDelete(

@@ -152,10 +152,7 @@ export function bindAlterTable(
       new AddColumnAction(
         dbName,
         tableName,
-        {
-          name: stmt.columnName,
-          ...stmt.inlineColumnSpec,
-        },
+        stmt.inlineColumnSpec,
         ctx.rules.autoIncrementColumnPolicy,
       ),
     );

@@ -55,32 +55,33 @@ export function bindCreateTable(
     : undefined;
 
   const columnSpecs: ColumnSpec[] = getColumnSpecsForStatement(
-    stmt.columnSchema,
+    stmt.columnList,
     queryPlan,
     ctx.rules.ddl.ctasColumnListOverridesQueryColumns,
     ctx.rules.ddl.ctasColumnListMustMatchQueryColumnCount,
   );
   function getColumnSpecsForStatement(
-    columnSchema: Record<string, InlineColumnSpec> | undefined,
+    columnList: InlineColumnSpec[] | undefined,
     queryPlan: QueryPlan | undefined,
     ctasColumnListOverridesQueryColumns: boolean,
     ctasColumnListMustMatchQueryColumnCount: boolean,
   ): ColumnSpec[] {
-    const columnsFromDefinition: ColumnSpec[] = columnSchema
-      ? getColumnSpecsFromColumnSchema(columnSchema)
-      : [];
-    function getColumnSpecsFromColumnSchema(
-      columnSchema: Record<string, InlineColumnSpec>
-    ): ColumnSpec[] {
-      const columnSpecs: ColumnSpec[] = [];
-      for (const [colName, inlineColSpec] of Object.entries(columnSchema)) {
-        columnSpecs.push({ name: colName, ...inlineColSpec });
-      }
-      return columnSpecs;
-    }
+    //const columnsFromDefinition: ColumnSpec[] = columnList ?? [];
+    //  ? getColumnSpecsFromColumnSchema(columnList)
+    //  : [];
+    // function getColumnSpecsFromColumnSchema(
+    //   columnList: InlineColumnSpec[]
+    // ): ColumnSpec[] {
+    //   const columnSpecs: ColumnSpec[] = [];
+    //   for (const [colName, inlineColSpec] of Object.entries(columnList)) {
+    //     columnSpecs.push({ name: colName, ...inlineColSpec });
+    //   }
+    //   return columnSpecs;
+    // }
+    // TODO, remove
 
     if (!queryPlan) {
-      return columnsFromDefinition;
+      return columnList ?? [];
     }
 
     const columnsFromQuery: ColumnSpec[] = queryPlan
@@ -97,7 +98,7 @@ export function bindCreateTable(
     }
 
     const columnSpecs: ColumnSpec[] = unifyColumnSpecSets(
-      columnsFromDefinition,
+      columnList ?? [],
       columnsFromQuery,
       ctasColumnListOverridesQueryColumns,
       ctasColumnListMustMatchQueryColumnCount,
@@ -320,25 +321,25 @@ export function bindCreateTable(
   }
 
   const constraintSpecs: ConstraintSpec[] = getConstraintSpecsForStatement(
-    stmt.columnSchema,
+    stmt.columnList,
     stmt.constraintSchema,
     ctx.rules.ddl.supportsInlineForeignKeys,
   );
   function getConstraintSpecsForStatement(
-    inlineColumnSchema: Record<string, InlineColumnSpec> | undefined,
+    inlineColumnList: InlineColumnSpec[] | undefined,
     tableConstraintSchema: Record<string, ConstraintSpec> | undefined,
     supportsInlineForeignKeys: boolean,
   ): ConstraintSpec[] {
-    const inlineConstraints = inlineColumnSchema
-      ? getConstraintSpecsFromColumnSpecs(inlineColumnSchema)
+    const inlineConstraints = inlineColumnList
+      ? getConstraintSpecsFromColumnSpecs(inlineColumnList)
       : [];
     function getConstraintSpecsFromColumnSpecs(
-      inlineColumnSchema: Record<string, InlineColumnSpec>
+      inlineColumnList: InlineColumnSpec[]
     ): ConstraintSpec[] {
       const specs: ConstraintSpec[] = []; 
-      for (const [name, inlineColumnSpec] of Object.entries(inlineColumnSchema)) {
+      for (const inlineColumnSpec of inlineColumnList) {
         specs.push(
-          ...constraintSpecsFromColumnSpec(name, inlineColumnSpec),
+          ...constraintSpecsFromColumnSpec(inlineColumnSpec),
         );
       }
       return specs;
@@ -523,7 +524,6 @@ export function bindCreateTable(
 }
 
 function constraintSpecsFromColumnSpec(
-  colName: string,
   colSpec: InlineColumnSpec,
 ): ConstraintSpec[] {
   const specs: ConstraintSpec[] = [];
@@ -531,25 +531,24 @@ function constraintSpecsFromColumnSpec(
   if (colSpec.primaryKey) {
     specs.push({
       kind: CONSTRAINT_KIND.primaryKey,
-      name: `${colName}_pk`,
-      columns: [colName],
-      //index: `${colName}_i`,
+      name: `${colSpec.name}_pk`,
+      columns: [colSpec.name],
     });
   }
 
   if (colSpec.unique) {
     specs.push({
       kind: CONSTRAINT_KIND.unique,
-      name: `${colName}_uniq`,
-      columns: [colName],
+      name: `${colSpec.name}_uniq`,
+      columns: [colSpec.name],
     });
   }
 
   if (colSpec.references) {
     specs.push({
       kind: CONSTRAINT_KIND.foreignKey,
-      name: `${colName}_fk`,
-      columns: [colName],
+      name: `${colSpec.name}_fk`,
+      columns: [colSpec.name],
       parentTable: colSpec.references.table,
       parentColumns: [colSpec.references.column],
     });
@@ -558,7 +557,7 @@ function constraintSpecsFromColumnSpec(
   if (colSpec.check) {
     specs.push({
       kind: CONSTRAINT_KIND.check,
-      name: `${colName}_chk`,
+      name: `${colSpec.name}_chk`,
       predicate: colSpec.check,
     });
   }

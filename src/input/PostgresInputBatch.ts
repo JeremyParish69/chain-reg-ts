@@ -34,10 +34,10 @@ export class PostgresInputBatch extends InputBatch {
 
   createTable(
     table: string,
-    columnSchema?: Record<string, InlineColumnSpec>,
+    columnList?: InlineColumnSpec[],
     constraintSchema?: Record<string, ConstraintSpec>,
   ) {
-    return super.createTable(table, columnSchema, constraintSchema);
+    return super.createTable(table, columnList, constraintSchema);
   }
 
   as(
