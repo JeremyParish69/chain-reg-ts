@@ -55,8 +55,8 @@ export class PostgresInputBatch extends InputBatch {
     return super.addConstraint(name);
   }
 
-  add(columnName: string, inlineColumnSpec: InlineColumnSpec) {
-    return super.addColumn(columnName, inlineColumnSpec);
+  add(columnList: InlineColumnSpec[]) {
+    return super.addColumns(columnList);
   }
 
   unique(columns: string[]) {

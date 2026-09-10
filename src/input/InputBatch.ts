@@ -265,17 +265,15 @@ export abstract class InputBatch {
     return this;
   }
 
-  protected addColumn(
-    columnName: string,
-    inlineColumnSpec: InlineColumnSpec, // TODO
-    //columnList: InlineColumnSpec[],
+  protected addColumns(
+    columnList: InlineColumnSpec[],
     fragment: string = "ADD COLUMN",
   ) {
     this.assertAllowed("addColumn", fragment);
     if (!(this.currentBuilder instanceof AlterTableBuilder)) {
       throw new Error(`Cannot call '${fragment}' outside of AlterTable`);
     }
-    this.currentBuilder.addColumn(columnName, inlineColumnSpec);
+    this.currentBuilder.addColumns(columnList);
     return this;
   }
 

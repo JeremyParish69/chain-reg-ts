@@ -70,29 +70,6 @@ function constraintSchemaToList(
   return specs;
 }
 
-export function addColumnTestSpec(
-  name: string,
-  spec: Omit<InlineColumnSpec, "name"> | InlineColumnSpec,
-):  [
-      string,
-      InlineColumnSpec,
-    ]
-{
-  const columnSpec = "name" in spec
-    ? spec
-    : namelessColumnToSpec(name, spec)
-  ;
-
-  return [name, columnSpec];
-}
-
-function namelessColumnToSpec(
-  name: string,
-  spec: Omit<InlineColumnSpec, "name">,
-): InlineColumnSpec {
-  return { ...spec, name };
-}
-
 export function createDelete(
   table: Table,
   rowNum: number,

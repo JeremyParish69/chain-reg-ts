@@ -3,7 +3,7 @@ import { createTestMySqlSql, createTestPostgresSql, createTestSqlServerSql, fres
 import { DEFAULT } from '../../src/dialect/keywords.ts';
 import { Dialect } from '../../src/dialect/Dialect.ts';
 import { SQL_DECIMAL, SQL_VARCHAR } from '../../src/types/SqlType.ts';
-import { addColumnTestSpec, createTableTestSpec } from '../utils/buildSchema.ts';
+import { createTableTestSpec } from '../utils/buildSchema.ts';
 
 describe("Integration::schema", () => {
   describe("ColumnPolicy", () => {
@@ -148,12 +148,13 @@ describe("Integration::schema", () => {
 
       sql
         .alterTable("Users")
-        .add(...addColumnTestSpec(...addColumnTestSpec("Sequence", {
+        .add([{
+          name: "Sequence",
           type: SQL_DECIMAL,
           nullable: false,
           autoIncrementStart: 1,
           autoIncrementStep: 1,
-        })))
+        }])
         .execute();
 
       expect(() => {
@@ -304,12 +305,13 @@ describe("Integration::schema", () => {
 
       sql
         .alterTable("Users")
-        .add(...addColumnTestSpec("Sequence", {
+        .add([{
+          name: "Sequence",
           type: SQL_DECIMAL,
           nullable: false,
           autoIncrementStart: 1,
           autoIncrementStep: 1,
-        }))
+        }])
         .execute();
 
       expect(() => {
@@ -443,12 +445,13 @@ describe("Integration::schema", () => {
       expect(() => {
         sql
           .alterTable("Users")
-          .add(...addColumnTestSpec("Sequence", {
+          .add([{
+            name: "Sequence",
             type: SQL_DECIMAL,
             nullable: false,
             autoIncrementStart: 100,
             autoIncrementStep: 1,
-          }))
+          }])
           .execute();
       }).toThrow();
     });
@@ -482,12 +485,13 @@ describe("Integration::schema", () => {
       expect(() => {
         sql
           .alterTable("Users")
-          .add(...addColumnTestSpec("Sequence", {
+          .add([{
+            name: "Sequence",
             type: SQL_DECIMAL,
             nullable: false,
             autoIncrementStart: 100,
             autoIncrementStep: 1,
-          }))
+          }])
           .execute();
       }).not.toThrow();
     });

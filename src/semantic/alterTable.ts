@@ -19,6 +19,8 @@ import { AddIndexAction } from "../actions/AddIndexAction.js";
 import { DropUniqueAction } from "../actions/DropUniqueAction.js";
 import { type Column } from "../relational/Column.js";
 import { AddUniqueConstraintAction } from "../actions/AddUniqueConstraintAction.js";
+import { RenameColumnAction } from "../actions/RenameColumnAction.js";
+import { DropColumnAction } from "../actions/DropColumnAction.js";
 
 export function bindAlterTable(
   semantic: SemanticAnalyzer,
@@ -147,16 +149,36 @@ export function bindAlterTable(
     }
   } else if (stmt.op === "drop_primary_key") {
     stmtActions.push(new DropPrimaryKeyAction(dbName, tableName));
-  } else if (stmt.op === "add_column") {
-    stmtActions.push(
-      new AddColumnAction(
-        dbName,
-        tableName,
-        stmt.inlineColumnSpec,
-        ctx.rules.autoIncrementColumnPolicy,
-      ),
-    );
+  } else if (stmt.op === "add_columns") {
+    for (const columnSpec of stmt.columnList) {
+      stmtActions.push(
+        new AddColumnAction(
+          dbName,
+          tableName,
+          columnSpec,
+          ctx.rules.autoIncrementColumnPolicy,
+        ),
+      );
+    }
   }
+  // } else if (stmt.op === "rename_column") {
+  //   stmtActions.push(
+  //     new RenameColumnAction(
+  //       dbName,
+  //       tableName,
+  //       columnName,
+  //       newName,
+  //     ),
+  //   );
+  // } else if (stmt.op === "drop_column") {
+  //   stmtActions.push(
+  //     new DropColumnAction(
+  //       dbName,
+  //       tableName,
+  //       columnName,
+  //     ),
+  //   );
+  // }
 
   //TODO, add the remaining ops (rename column, drop column, etc.)
 

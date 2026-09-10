@@ -52,11 +52,8 @@ export class MySqlInputBatch extends InputBatch {
     return super.alterTable(table);
   }
 
-  // Add allows adding multiple columns
-  // call .add().add() vs .add([col_1, col_2]) vs record
-  // TODO
-  add(columnName: string, inlineColumnSpec: InlineColumnSpec) {
-    return super.addColumn(columnName, inlineColumnSpec);
+  add(columnList: InlineColumnSpec[]) {
+    return super.addColumns(columnList);
   }
 
   addConstraint(name: string) {
