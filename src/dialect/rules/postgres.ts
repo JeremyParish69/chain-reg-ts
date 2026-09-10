@@ -33,7 +33,8 @@ export const POSTGRES_RULES: DialectRules = {
     supportsIfExists: true,
     supportsDeferrableConstraints: true,
     supportsInlineForeignKeys: true,
-    ctasDefinedColumnListOverridesQueryColumns: true,
+    ctasColumnListOverridesQueryColumns: true,
+    ctasColumnListMustMatchQueryColumnCount: true,
   },
 
   constraints: {

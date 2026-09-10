@@ -22,8 +22,7 @@ import { bindSelect } from "./select.js";
 import { normalizeIdentifier } from "../utils/normalizeIdentifier.js";
 import { isAssignable } from "../types/SqlType.js";
 import { ExecutionContext } from "../engine/ExecutionContext.js";
-import { InsertSelectAction } from "../actions/InsertSelectAction.js";
-import { resolveTargetColumns } from "./resolveColumnList.js";
+import { PopulateTableFromQueryAction } from "../actions/PopulateTableFromQueryAction.js";
 
 export function bindCreateTable(
   semantic: SemanticAnalyzer,
@@ -58,12 +57,14 @@ export function bindCreateTable(
   const columnSpecs: ColumnSpec[] = getColumnSpecsForStatement(
     stmt.columnSchema,
     queryPlan,
-    ctx.rules.ddl.ctasDefinedColumnListOverridesQueryColumns
+    ctx.rules.ddl.ctasColumnListOverridesQueryColumns,
+    ctx.rules.ddl.ctasColumnListMustMatchQueryColumnCount,
   );
   function getColumnSpecsForStatement(
     columnSchema: Record<string, InlineColumnSpec> | undefined,
     queryPlan: QueryPlan | undefined,
-    ctasDefinedColumnListOverridesQueryColumns: boolean,
+    ctasColumnListOverridesQueryColumns: boolean,
+    ctasColumnListMustMatchQueryColumnCount: boolean,
   ): ColumnSpec[] {
     const columnsFromDefinition: ColumnSpec[] = columnSchema
       ? getColumnSpecsFromColumnSchema(columnSchema)
@@ -98,85 +99,187 @@ export function bindCreateTable(
     const columnSpecs: ColumnSpec[] = unifyColumnSpecSets(
       columnsFromDefinition,
       columnsFromQuery,
-      ctasDefinedColumnListOverridesQueryColumns,
+      ctasColumnListOverridesQueryColumns,
+      ctasColumnListMustMatchQueryColumnCount,
     );
+    //TODO, delete? because it was replaced just below
+    // function unifyColumnSpecSets(
+    //   columnsFromDefinition: ColumnSpec[],
+    //   columnsFromQuery: ColumnSpec[],
+    //   ctasDefinedColumnListOverridesQueryColumns: boolean,
+    // ): ColumnSpec[] {
+    //   assertNoDuplicateColumnNames(columnsFromDefinition);
+    //   assertNoDuplicateColumnNames(columnsFromQuery);
+
+    //   const columnSpecs: ColumnSpec[] = [];
+    //   const addedColumnNames = new Set<string>();
+
+    //   if (!ctasDefinedColumnListOverridesQueryColumns) {
+    //     for (const definitionColumn of columnsFromDefinition) {
+    //       const definitionName = normalizeIdentifier(definitionColumn.name);
+    //       addedColumnNames.add(definitionName);
+
+    //       const queryColumn = columnsFromQuery.find(
+    //         (column) =>
+    //           normalizeIdentifier(column.name) === definitionName,
+    //       );
+
+    //       if (!queryColumn) {
+    //         columnSpecs.push(definitionColumn);
+    //         continue;
+    //       }
+
+    //       columnSpecs.push(
+    //         unifyColumnSpecs(definitionColumn, queryColumn),
+    //       );
+    //     }
+
+    //     for (const queryColumn of columnsFromQuery) {
+    //       if (!addedColumnNames.has(
+    //         normalizeIdentifier(queryColumn.name)
+    //       )) {
+    //         columnSpecs.push(queryColumn);
+    //       }
+    //     }
+    //   } else {
+    //     for (const [i, queryColumn] of columnsFromQuery.entries()) {
+    //       if (i < columnsFromDefinition.length) {
+    //         columnSpecs.push(
+    //           unifyColumnSpecs(
+    //             columnsFromDefinition[i],
+    //             queryColumn,
+    //           )
+    //         );
+    //       } else {
+    //         columnSpecs.push(queryColumn);
+    //       }
+    //     }
+    //   }
+
+    //   return columnSpecs;
+
+    //   function unifyColumnSpecs(
+    //     definitionColumnSpec: ColumnSpec,
+    //     queryColumnSpec: ColumnSpec,
+    //   ): ColumnSpec {
+    //     if (!isAssignable(
+    //       queryColumnSpec.type,
+    //       definitionColumnSpec.type,
+    //     )) {
+    //       throw new Error(`Cannot assign type:
+    //         ${queryColumnSpec.type} to type:
+    //         ${definitionColumnSpec.type}`);
+    //     }
+
+    //     const nullable: boolean | undefined =
+    //       definitionColumnSpec.nullable !== undefined
+    //         ? definitionColumnSpec.nullable
+    //         : queryColumnSpec.nullable
+
+
+    //     return {
+    //       ...definitionColumnSpec,
+    //       nullable,
+    //     };
+    //   }
+    // }
     function unifyColumnSpecSets(
       columnsFromDefinition: ColumnSpec[],
       columnsFromQuery: ColumnSpec[],
-      ctasDefinedColumnListOverridesQueryColumns: boolean,
+      ctasColumnListOverridesQueryColumns: boolean,
+      ctasColumnListMustMatchQueryColumnCount: boolean,
     ): ColumnSpec[] {
       assertNoDuplicateColumnNames(columnsFromDefinition);
       assertNoDuplicateColumnNames(columnsFromQuery);
 
-      const columnSpecs: ColumnSpec[] = [];
-      const addedColumnNames = new Set<string>();
-
-      if (!ctasDefinedColumnListOverridesQueryColumns) {
-        for (const definitionColumn of columnsFromDefinition) {
-          const definitionName = normalizeIdentifier(definitionColumn.name);
-          addedColumnNames.add(definitionName);
-
-          const queryColumn = columnsFromQuery.find(
-            (column) =>
-              normalizeIdentifier(column.name) === definitionName,
-          );
-
-          if (!queryColumn) {
-            columnSpecs.push(definitionColumn);
-            continue;
-          }
-
-          columnSpecs.push(
-            unifyColumnSpecs(definitionColumn, queryColumn),
-          );
-        }
-
-        for (const queryColumn of columnsFromQuery) {
-          if (!addedColumnNames.has(
-            normalizeIdentifier(queryColumn.name)
-          )) {
-            columnSpecs.push(queryColumn);
-          }
-        }
-      } else {
-        for (const [i, queryColumn] of columnsFromQuery.entries()) {
-          if (i < columnsFromDefinition.length) {
-            columnSpecs.push(
-              unifyColumnSpecs(
-                columnsFromDefinition[i],
-                queryColumn,
-              )
-            );
-          } else {
-            columnSpecs.push(queryColumn);
-          }
-        }
+      if (
+        ctasColumnListMustMatchQueryColumnCount &&
+        columnsFromDefinition.length > 0 &&
+        columnsFromDefinition.length !== columnsFromQuery.length
+      ) {
+        throw new Error(`CTAS column list count does not match query column count`);
       }
 
-      return columnSpecs;
+      if (ctasColumnListOverridesQueryColumns) {
+        return unifyPositionalColumnSpecs(
+          columnsFromDefinition,
+          columnsFromQuery,
+        );
+      }
 
-      function unifyColumnSpecs(
-        definitionColumnSpec: ColumnSpec,
-        queryColumnSpec: ColumnSpec,
-      ): ColumnSpec {
-        if (!isAssignable(
-          queryColumnSpec.type,
-          definitionColumnSpec.type,
-        )) {
-          throw new Error(`Cannot assign type:
-            ${queryColumnSpec.type} to type:
-            ${definitionColumnSpec.type}`);
+      return unifyNamedColumnSpecs(
+        columnsFromDefinition,
+        columnsFromQuery,
+      );
+
+      function unifyPositionalColumnSpecs(
+        definitions: ColumnSpec[],
+        queryColumns: ColumnSpec[],
+      ): ColumnSpec[] {
+        return queryColumns.map((queryColumn, index) => {
+          const definitionColumn = definitions[index];
+
+          return definitionColumn
+            ? unifyColumnSpecs(definitionColumn, queryColumn)
+            : queryColumn;
+        });
+      }
+
+      function unifyNamedColumnSpecs(
+        definitions: ColumnSpec[],
+        queryColumns: ColumnSpec[],
+      ): ColumnSpec[] {
+        const result: ColumnSpec[] = [];
+        const addedNames = new Set<string>();
+
+        for (const definitionColumn of definitions) {
+          const normalizedName = normalizeIdentifier(definitionColumn.name);
+          addedNames.add(normalizedName);
+
+          const queryColumn = queryColumns.find(
+            (column) =>
+              normalizeIdentifier(column.name) === normalizedName,
+          );
+
+          result.push(
+            queryColumn
+              ? unifyColumnSpecs(definitionColumn, queryColumn)
+              : definitionColumn,
+          );
         }
 
-        const nullable: boolean | undefined =
-          definitionColumnSpec.nullable !== undefined
-            ? definitionColumnSpec.nullable
-            : queryColumnSpec.nullable
+        for (const queryColumn of queryColumns) {
+          const normalizedName = normalizeIdentifier(queryColumn.name);
 
+          if (!addedNames.has(normalizedName)) {
+            result.push(queryColumn);
+          }
+        }
+
+        return result;
+      }
+
+      function unifyColumnSpecs(
+        definitionColumn: ColumnSpec,
+        queryColumn: ColumnSpec,
+      ): ColumnSpec {
+        if (!isAssignable(
+          queryColumn.type,
+          definitionColumn.type,
+        )) {
+          throw new Error(
+            `Cannot assign query column type ` +
+            `${queryColumn.type.kind} to defined column type ` +
+            `${definitionColumn.type.kind}`,
+          );
+        }
 
         return {
-          ...definitionColumnSpec,
-          nullable,
+          ...definitionColumn,
+          nullable:
+            definitionColumn.nullable !== undefined
+              ? definitionColumn.nullable
+              : queryColumn.nullable,
         };
       }
     }
@@ -402,12 +505,17 @@ export function bindCreateTable(
   }
 
   if (queryPlan) {
+    const targetColumnNames = columnSpecs.map(
+      (columnSpec) => columnSpec.name,
+    );
+
     stmtActions.push(
-      new InsertSelectAction(
+      new PopulateTableFromQueryAction(
         dbName,
         tableName,
+        targetColumnNames,
         queryPlan,
-      )
+      ),
     );
   }
 

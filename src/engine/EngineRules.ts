@@ -26,7 +26,12 @@ export const ENGINE_RULES: Record<
         DIALECT_RULES[d].ddl.supportsInlineForeignKeys,
       engineDefault: true,
     },
-    ctasDefinedColumnListOverridesQueryColumns: {
+    ctasColumnListOverridesQueryColumns: {
+      dialectStrict: (d: Dialect) =>
+        DIALECT_RULES[d].ddl.supportsInlineForeignKeys,
+      engineDefault: false,
+    },
+    ctasColumnListMustMatchQueryColumnCount: {
       dialectStrict: (d: Dialect) =>
         DIALECT_RULES[d].ddl.supportsInlineForeignKeys,
       engineDefault: false,

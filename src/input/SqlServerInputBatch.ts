@@ -10,6 +10,7 @@ import type { UpdateInput } from "../types/UpdateInput.js";
 import type { InsertInput } from "../types/InsertInput.js";
 import type { ColumnValue } from "../types/ColumnValue.js";
 import type { ExpressionNode } from "../ast/expression/ExpressionNode.js";
+import type { SelectInput } from "../types/SelectInput.js";
 
 export class SqlServerInputBatch extends InputBatch {
   constructor(executeStatement: (stmt: Statement) => void) {
@@ -88,7 +89,7 @@ export class SqlServerInputBatch extends InputBatch {
   }
 
   select(
-    expressionsOrQuery: (ExpressionNode | ColumnValue)[] | "*" | QueryStatement,
+    expressionsOrQuery: SelectInput[] | "*" | QueryStatement,
   ) {
     return super.select(expressionsOrQuery);
   }

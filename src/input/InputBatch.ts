@@ -33,6 +33,7 @@ import type { RowView } from "../relational/RowView.js";
 import type { InsertInput } from "../types/InsertInput.js";
 import type { ExpressionNode } from "../ast/expression/ExpressionNode.js";
 import type { ColumnValue } from "../types/ColumnValue.js";
+import type { SelectInput } from "../types/SelectInput.js";
 
 export abstract class InputBatch {
   private statements: Statement[] = [];
@@ -368,53 +369,8 @@ export abstract class InputBatch {
     return this;
   }
 
-  // protected select(query: QueryStatement, fragment: string = "SELECT") {
-  //   this.assertAllowed("select", fragment);
-  //   if (!(this.currentBuilder instanceof InsertIntoBuilder)) {
-  //     throw new Error(`Cannot call '${fragment}' outside of InsertInto`);
-  //   }
-  //   this.currentBuilder.select(query);
-  //   return this;
-  // }
-
-  // protected select(columns: string[] | "*", fragment: string = "SELECT") {
-  //   this.assertAllowed("select", fragment);
-  //   this.finalizePreviousStatement();
-  //   this.currentBuilder = new SelectBuilder(columns);
-  //   return this;
-  // }
-
-  // protected select(
-  //   columnsOrQuery: string[] | "*" | QueryStatement,
-  //   fragment: string = "SELECT",
-  // ) {
-  //   this.assertAllowed("select", fragment);
-
-  //   if (this.currentBuilder instanceof InsertIntoBuilder) {
-  //     if (!isQueryStatement(columnsOrQuery)) {
-  //       throw new Error(
-  //         `Cannot use '${fragment}' after insertInto() without a query statement`,
-  //       );
-  //     }
-
-  //     this.currentBuilder.select(columnsOrQuery);
-  //     return this;
-  //   }
-
-  //   this.finalizePreviousStatement();
-
-  //   if (isQueryStatement(columnsOrQuery)) {
-  //     throw new Error(
-  //       `Columns or "*" expected after SELECT.`,
-  //     );
-  //   }
-
-  //   this.currentBuilder = new SelectBuilder(columnsOrQuery);
-  //   return this;
-  // }
-
   protected select(
-    expressionsOrQuery: (ExpressionNode | ColumnValue)[] | "*" | QueryStatement,
+    expressionsOrQuery: SelectInput[] | "*" | QueryStatement,
     fragment: string = "SELECT",
   ) {
     if (isQueryStatement(expressionsOrQuery)) {
@@ -422,8 +378,7 @@ export abstract class InputBatch {
       this.assertAllowed("select", fragment);
 
       if (
-        !(this.currentBuilder instanceof InsertIntoBuilder) // &&
-        //!(this.currentBuilder instanceof CreateTableBuilder)
+        !(this.currentBuilder instanceof InsertIntoBuilder)
       ) {
         throw new Error(
           `Cannot use '${fragment}' with a constructed query outside INSERT`,

@@ -9,8 +9,7 @@ import { type ReferentialAction } from "../relational/ReferentialAction.js";
 import { type PredicateNode } from "../ast/predicate/PredicateNode.js";
 import type { UpdateInput } from "../types/UpdateInput.js";
 import type { InsertInput } from "../types/InsertInput.js";
-import type { ColumnValue } from "../types/ColumnValue.js";
-import type { ExpressionNode } from "../ast/expression/ExpressionNode.js";
+import type { SelectInput } from "../types/SelectInput.js";
 
 export class PostgresInputBatch extends InputBatch {
   constructor(executeStatement: (stmt: Statement) => void) {
@@ -109,7 +108,7 @@ export class PostgresInputBatch extends InputBatch {
   }
 
   select(
-    expressionsOrQuery: (ExpressionNode | ColumnValue)[] | "*" | QueryStatement,
+    expressionsOrQuery: SelectInput[] | "*" | QueryStatement,
   ) {
     return super.select(expressionsOrQuery);
   }
