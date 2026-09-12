@@ -31,9 +31,9 @@ export class PopulateTableFromQueryAction implements Action {
     const queryRows: IterableIterator<RowView> = this.queryPlan.root.execute();
 
     const inputRows: Map<ColumnId, ColumnInput>[] = mapQueryRowsToInsertRows(
-        queryRows,
-        columnIds,
-      );
+      queryRows,
+      columnIds,
+    );
 
     const updatedDatabase = db.addRows(this.tableName, inputRows);
 

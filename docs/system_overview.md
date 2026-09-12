@@ -79,6 +79,7 @@ Export
 * Compile-time and runtime enforcement of valid builder sequences
 * Structured AST representation for SQL
 * Direct runtime expressions for discovery and import
+* SQL operations include DDL, DML, queries, and query-based table creation where supported by the active dialect.
 
 ## Typical Use Cases
 

@@ -8,8 +8,6 @@ import {
 import { type PredicateNode } from "../ast/predicate/PredicateNode.js";
 import type { UpdateInput } from "../types/UpdateInput.js";
 import type { InsertInput } from "../types/InsertInput.js";
-import type { ExpressionNode } from "../ast/expression/ExpressionNode.js";
-import type { ColumnValue } from "../types/ColumnValue.js";
 import type { SelectInput } from "../types/SelectInput.js";
 
 export class MySqlInputBatch extends InputBatch {
@@ -41,10 +39,7 @@ export class MySqlInputBatch extends InputBatch {
     return super.createTable(table, columnList, constraintList);
   }
 
-  as(
-    query: QueryStatement,
-    fragment: string = "AS",
-  ) {
+  as(query: QueryStatement) {
     return super.as(query);
   }
 
@@ -104,9 +99,7 @@ export class MySqlInputBatch extends InputBatch {
     return super.returning(cols);
   }
 
-  select(
-    expressionsOrQuery: SelectInput[] | "*" | QueryStatement,
-  ) {
+  select(expressionsOrQuery: SelectInput[] | "*" | QueryStatement) {
     return super.select(expressionsOrQuery);
   }
 

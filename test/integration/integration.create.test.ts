@@ -4,6 +4,7 @@ import { SQL_INTEGER, SQL_VARCHAR } from '../../src/types/SqlType.ts';
 import { col, selectAs } from '../../src/ast/dsl.ts';
 import { Dialect } from '../../src/dialect/Dialect.ts';
 import { createTableTestSpec } from '../utils/buildSchema.ts';
+import { CONSTRAINT_KIND } from '../../src/relational/ConstraintKind.ts';
 
 describe("Integration::create", () => {
   describe("CTAS", () => {
@@ -744,6 +745,65 @@ describe("Integration::create", () => {
           values: [2, "Bob"],
         },
       ]]);
+    });
+
+    it("applies constraints to a table created with CTAS", () => {
+      const engine = freshEngine(Dialect.MySQL);
+      const sql = createTestMySqlSql(engine);
+
+      sql.createDatabase("DB1").execute();
+      sql.useDatabase("DB1").execute();
+
+      sql.createTable("Users", [
+        {
+          name: "Id",
+          type: SQL_INTEGER,
+          nullable: false,
+        },
+        {
+          name: "Name",
+          type: SQL_VARCHAR,
+          nullable: false,
+        },
+      ]).execute();
+
+      sql.insertInto("Users", ["Id", "Name"]).values([
+        [1, "Alice"],
+        [2, "Bob"],
+      ]).execute();
+
+      sql.createTable(
+        "UsersCopy",
+        [
+          {
+            name: "Id",
+            type: SQL_INTEGER,
+            nullable: false,
+          },
+          {
+            name: "Name",
+            type: SQL_VARCHAR,
+            nullable: false,
+          },
+        ],
+        [
+          {
+            kind: CONSTRAINT_KIND.primaryKey,
+            name: "PK_UsersCopy",
+            columns: ["Id"],
+          },
+        ],
+      ).as(
+        sql.select([col("Id"), col("Name")])
+          .from("Users")
+          .asQueryStatement(),
+      ).execute();
+
+      expect(() => {
+        sql.insertInto("UsersCopy", ["Id", "Name"]).values([
+          [1, "Duplicate"],
+        ]).execute();
+      }).toThrow();
     });
   });
 });

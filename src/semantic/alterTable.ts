@@ -167,29 +167,18 @@ export function bindAlterTable(
     assertNewNameAvailable(stmt.to);
     function assertNewNameAvailable(newName: string): void {
       if (table.columns.getByName(newName) !== undefined) {
-        throw new Error(`Replacement column name ${newName} already taken`)
+        throw new Error(`Replacement column name ${newName} already taken`);
       }
     }
 
     stmtActions.push(
-      new RenameColumnAction(
-        dbName,
-        tableName,
-        stmt.from,
-        stmt.to,
-      ),
+      new RenameColumnAction(dbName, tableName, stmt.from, stmt.to),
     );
   } else if (stmt.op === "drop_column") {
     for (const columnName of stmt.columnNames) {
       table.columns.requireByName(columnName);
 
-      stmtActions.push(
-        new DropColumnAction(
-          dbName,
-          tableName,
-          columnName,
-        ),
-      );
+      stmtActions.push(new DropColumnAction(dbName, tableName, columnName));
     }
   } else if (stmt.op === "modify_column") {
     for (const columnSpec of stmt.columnList) {

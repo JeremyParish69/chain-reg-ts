@@ -40,10 +40,7 @@ export class PostgresInputBatch extends InputBatch {
     return super.createTable(table, columnList, constraintList);
   }
 
-  as(
-    query: QueryStatement,
-    fragment: string = "AS",
-  ) {
+  as(query: QueryStatement) {
     return super.as(query);
   }
 
@@ -119,9 +116,7 @@ export class PostgresInputBatch extends InputBatch {
     return super.returning(cols);
   }
 
-  select(
-    expressionsOrQuery: SelectInput[] | "*" | QueryStatement,
-  ) {
+  select(expressionsOrQuery: SelectInput[] | "*" | QueryStatement) {
     return super.select(expressionsOrQuery);
   }
 

@@ -28,12 +28,16 @@ export const ENGINE_RULES: Record<
     },
     ctasColumnListOverridesQueryColumns: {
       dialectStrict: (d: Dialect) =>
-        DIALECT_RULES[d].ddl.supportsInlineForeignKeys,
+        DIALECT_RULES[d].ddl.ctasColumnListOverridesQueryColumns,
       engineDefault: false,
     },
     ctasColumnListMustMatchQueryColumnCount: {
       dialectStrict: (d: Dialect) =>
-        DIALECT_RULES[d].ddl.supportsInlineForeignKeys,
+        DIALECT_RULES[d].ddl.ctasColumnListMustMatchQueryColumnCount,
+      engineDefault: false,
+    },
+    ctasAllowsConstraints: {
+      dialectStrict: (d: Dialect) => DIALECT_RULES[d].ddl.ctasAllowsConstraints,
       engineDefault: false,
     },
   },

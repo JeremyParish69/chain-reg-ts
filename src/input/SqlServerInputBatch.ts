@@ -8,8 +8,6 @@ import {
 import { type PredicateNode } from "../ast/predicate/PredicateNode.js";
 import type { UpdateInput } from "../types/UpdateInput.js";
 import type { InsertInput } from "../types/InsertInput.js";
-import type { ColumnValue } from "../types/ColumnValue.js";
-import type { ExpressionNode } from "../ast/expression/ExpressionNode.js";
 import type { SelectInput } from "../types/SelectInput.js";
 
 export class SqlServerInputBatch extends InputBatch {
@@ -97,9 +95,7 @@ export class SqlServerInputBatch extends InputBatch {
     return super.returning(cols, "OUTPUT");
   }
 
-  select(
-    expressionsOrQuery: SelectInput[] | "*" | QueryStatement,
-  ) {
+  select(expressionsOrQuery: SelectInput[] | "*" | QueryStatement) {
     return super.select(expressionsOrQuery);
   }
 

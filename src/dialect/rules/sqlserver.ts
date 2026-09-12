@@ -33,6 +33,7 @@ export const SQLSERVER_RULES: DialectRules = {
     supportsInlineForeignKeys: true,
     ctasColumnListOverridesQueryColumns: false,
     ctasColumnListMustMatchQueryColumnCount: false,
+    ctasAllowsConstraints: false,
   },
 
   constraints: {

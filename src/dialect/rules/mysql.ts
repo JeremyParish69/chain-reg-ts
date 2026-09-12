@@ -31,6 +31,7 @@ export const MYSQL_RULES: DialectRules = {
     supportsInlineForeignKeys: false,
     ctasColumnListOverridesQueryColumns: false,
     ctasColumnListMustMatchQueryColumnCount: false,
+    ctasAllowsConstraints: true,
   },
 
   constraints: {

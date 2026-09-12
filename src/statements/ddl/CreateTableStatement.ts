@@ -8,7 +8,7 @@ export interface CreateTableStatement extends BaseStatement {
   table: string;
 
   columnList?: InlineColumnSpec[];
-  constraintList?: ConstraintSpec[],
+  constraintList?: ConstraintSpec[];
 
   select?: SelectStatement;
 }

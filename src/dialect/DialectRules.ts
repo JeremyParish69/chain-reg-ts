@@ -20,6 +20,7 @@ export interface DialectRules {
     supportsInlineForeignKeys: boolean;
     ctasColumnListOverridesQueryColumns: boolean;
     ctasColumnListMustMatchQueryColumnCount: boolean;
+    ctasAllowsConstraints: boolean;
   };
 
   constraints: {

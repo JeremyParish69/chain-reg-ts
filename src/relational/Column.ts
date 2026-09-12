@@ -329,7 +329,7 @@ export function validateColumnSpec(spec: ColumnSpec): void {
 }
 
 export type InlineColumnSpec = ColumnSpec & {
-//export type InlineColumnSpec = Omit<ColumnSpec, "name"> & {
+  //export type InlineColumnSpec = Omit<ColumnSpec, "name"> & {
   unique?: boolean;
   primaryKey?: boolean;
   references?: {

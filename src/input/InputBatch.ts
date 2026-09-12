@@ -175,16 +175,11 @@ export abstract class InputBatch {
     return this;
   }
 
-  protected as(
-    query: QueryStatement,
-    fragment: string = "AS",
-  ) {
+  protected as(query: QueryStatement, fragment: string = "AS") {
     this.currentBuilder = this.resumeBuilder();
     this.assertAllowed("as", fragment);
 
-    if (
-      !(this.currentBuilder instanceof CreateTableBuilder)
-    ) {
+    if (!(this.currentBuilder instanceof CreateTableBuilder)) {
       throw new Error(
         `Cannot use '${fragment}' with a constructed query outside CREATE TABLE`,
       );
@@ -393,9 +388,7 @@ export abstract class InputBatch {
       this.currentBuilder = this.resumeBuilder();
       this.assertAllowed("select", fragment);
 
-      if (
-        !(this.currentBuilder instanceof InsertIntoBuilder)
-      ) {
+      if (!(this.currentBuilder instanceof InsertIntoBuilder)) {
         throw new Error(
           `Cannot use '${fragment}' with a constructed query outside INSERT`,
         );

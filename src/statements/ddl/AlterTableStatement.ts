@@ -1,5 +1,5 @@
 import { type BaseStatement, type StatementBuilder } from "../Statement.js";
-import { Column, type InlineColumnSpec } from "../../relational/Column.js";
+import { type InlineColumnSpec } from "../../relational/Column.js";
 import {
   type ForeignKeySpec,
   type ConstraintSpec,

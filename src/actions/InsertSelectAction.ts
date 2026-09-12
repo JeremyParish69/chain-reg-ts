@@ -21,9 +21,9 @@ export class InsertSelectAction implements Action {
 
     const columnIds: ColumnId[] = this.targetColumns
       ? this.targetColumns
-      : this.queryPlan.columns.map(qc =>
-        table.columns.requireIdByName(qc.name)
-      );
+      : this.queryPlan.columns.map((qc) =>
+          table.columns.requireIdByName(qc.name),
+        );
 
     if (this.queryPlan.columns.length !== this.targetColumns.length) {
       throw new Error(
