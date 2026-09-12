@@ -9,8 +9,7 @@ import { type ReferentialAction } from "../relational/ReferentialAction.js";
 import { type PredicateNode } from "../ast/predicate/PredicateNode.js";
 import type { UpdateInput } from "../types/UpdateInput.js";
 import type { InsertInput } from "../types/InsertInput.js";
-import type { ColumnValue } from "../types/ColumnValue.js";
-import type { ExpressionNode } from "../ast/expression/ExpressionNode.js";
+import type { SelectInput } from "../types/SelectInput.js";
 
 export class PostgresInputBatch extends InputBatch {
   constructor(executeStatement: (stmt: Statement) => void) {
@@ -35,10 +34,14 @@ export class PostgresInputBatch extends InputBatch {
 
   createTable(
     table: string,
-    columnSchema: Record<string, InlineColumnSpec>,
-    constraintSchema: Record<string, ConstraintSpec> = {},
+    columnList?: InlineColumnSpec[],
+    constraintList?: ConstraintSpec[],
   ) {
-    return super.createTable(table, columnSchema, constraintSchema);
+    return super.createTable(table, columnList, constraintList);
+  }
+
+  as(query: QueryStatement) {
+    return super.as(query);
   }
 
   alterTable(table: string) {
@@ -49,8 +52,20 @@ export class PostgresInputBatch extends InputBatch {
     return super.addConstraint(name);
   }
 
-  add(columnName: string, inlineColumnSpec: InlineColumnSpec) {
-    return super.addColumn(columnName, inlineColumnSpec);
+  add(columnList: InlineColumnSpec[]) {
+    return super.addColumn(columnList);
+  }
+
+  dropColumn(columnNames: string[]) {
+    return super.dropColumn(columnNames);
+  }
+
+  renameColumn(from: string, to: string) {
+    return super.renameColumn(from, to);
+  }
+
+  alterColumn(columnList: InlineColumnSpec[]) {
+    return super.alterColumn(columnList);
   }
 
   unique(columns: string[]) {
@@ -101,9 +116,7 @@ export class PostgresInputBatch extends InputBatch {
     return super.returning(cols);
   }
 
-  select(
-    expressionsOrQuery: (ExpressionNode | ColumnValue)[] | "*" | QueryStatement,
-  ) {
+  select(expressionsOrQuery: SelectInput[] | "*" | QueryStatement) {
     return super.select(expressionsOrQuery);
   }
 

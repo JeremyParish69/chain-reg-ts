@@ -191,16 +191,16 @@ export class Table extends Immutable {
       i.tryUpdateColumnIndexes(columnIdToPositionMap),
     );
 
-    const tableWithUpdatesdPositions = this.with({
+    const tableWithUpdatedPositions = this.with({
       columns: updatedColumns,
       indexes: updatedIndexes,
     } as Partial<this>);
 
     const updatedChecks = this.checks.mapValues((chk) =>
-      chk.tryBindPredicate(tableWithUpdatesdPositions),
+      chk.tryBindPredicate(tableWithUpdatedPositions),
     );
 
-    return tableWithUpdatesdPositions.with({
+    return tableWithUpdatedPositions.with({
       checks: updatedChecks,
     } as Partial<this>);
   }

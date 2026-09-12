@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import { createTestPostgresSql, freshEngine } from "../utils/engineHelpers.js";
 import { col } from "../../src/ast/dsl.js";
 import { SQL_DECIMAL, SQL_VARCHAR } from "../../src/types/SqlType.js";
+import { createTableTestSpec } from "../utils/buildSchema.js";
 
 
 describe("ValidationEngine::validate", () => {
@@ -18,7 +19,7 @@ describe("ValidationEngine::validate", () => {
 
     sql.begin().execute();
 
-    sql.createTable("Users", {
+    sql.createTable(...createTableTestSpec("Users", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
@@ -27,7 +28,7 @@ describe("ValidationEngine::validate", () => {
         type: SQL_VARCHAR,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
     sql
       .insertInto("Users", ["Id", "Name"])
@@ -77,7 +78,7 @@ describe("ValidationEngine::validate", () => {
 
     sql.begin().execute();
 
-    sql.createTable("Users", {
+    sql.createTable(...createTableTestSpec("Users", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
@@ -86,7 +87,7 @@ describe("ValidationEngine::validate", () => {
         type: SQL_VARCHAR,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
     sql
       .insertInto("Users", ["Id", "Name"])
@@ -147,12 +148,12 @@ describe("ValidationEngine::validate", () => {
 
     sql.begin().execute();
 
-    sql.createTable("Users", {
+    sql.createTable(...createTableTestSpec("Users", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
     sql
       .insertInto("Users", ["Id"])
@@ -215,20 +216,20 @@ describe("ValidationEngine::validate", () => {
 
     sql.begin().execute();
 
-    sql.createTable("Users", {
+    sql.createTable(...createTableTestSpec("Users", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
         primaryKey: true,
       },
-    }).execute();
+    })).execute();
 
-    sql.createTable("Orders", {
+    sql.createTable(...createTableTestSpec("Orders", {
       UserId: {
         type: SQL_DECIMAL,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
     sql
       .insertInto("Users", ["Id"])
@@ -295,7 +296,7 @@ describe("ValidationEngine::validate", () => {
 
     sql.begin().execute();
 
-    sql.createTable("Users", {
+    sql.createTable(...createTableTestSpec("Users", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
@@ -304,7 +305,7 @@ describe("ValidationEngine::validate", () => {
         type: SQL_VARCHAR,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
     sql
       .insertInto("Users", ["Id", "Name"])
@@ -373,7 +374,7 @@ describe("ValidationEngine::validate", () => {
 
     sql.begin().execute();
 
-    sql.createTable("Users", {
+    sql.createTable(...createTableTestSpec("Users", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
@@ -382,7 +383,7 @@ describe("ValidationEngine::validate", () => {
         type: SQL_VARCHAR,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
     sql
       .insertInto("Users", ["Id", "Name"])
@@ -440,7 +441,7 @@ describe("ValidationEngine::validate", () => {
 
     sql.begin().execute();
 
-    sql.createTable("Users", {
+    sql.createTable(...createTableTestSpec("Users", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
@@ -449,7 +450,7 @@ describe("ValidationEngine::validate", () => {
         type: SQL_VARCHAR,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
     sql
       .insertInto("Users", ["Id", "Name"])
@@ -509,12 +510,12 @@ describe("ValidationEngine::validate", () => {
 
     sql.begin().execute();
 
-    sql.createTable("Users", {
+    sql.createTable(...createTableTestSpec("Users", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
     sql
       .insertInto("Users", ["Id"])
@@ -568,12 +569,12 @@ describe("ValidationEngine::validate", () => {
 
     sql.begin().execute();
 
-    sql.createTable("Users", {
+    sql.createTable(...createTableTestSpec("Users", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
     sql.commit().execute();
 
@@ -613,12 +614,12 @@ describe("ValidationEngine::validate participants", () => {
 
     sql.begin().execute();
 
-    sql.createTable("Users", {
+    sql.createTable(...createTableTestSpec("Users", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
     sql
       .insertInto("Users", ["Id"])
@@ -671,12 +672,12 @@ describe("ValidationEngine::validate participants", () => {
 
     sql.begin().execute();
 
-    sql.createTable("Users", {
+    sql.createTable(...createTableTestSpec("Users", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
     sql
       .insertInto("Users", ["Id"])
@@ -740,20 +741,20 @@ describe("ValidationEngine::validate participants", () => {
 
     sql.begin().execute();
 
-    sql.createTable("Parents", {
+    sql.createTable(...createTableTestSpec("Parents", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
         primaryKey: true,
       },
-    }).execute();
+    })).execute();
 
-    sql.createTable("Children", {
+    sql.createTable(...createTableTestSpec("Children", {
       ParentId: {
         type: SQL_DECIMAL,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
     sql
       .insertInto("Parents", ["Id"])
@@ -821,12 +822,12 @@ describe("ValidationEngine::validate rule evaluation", () => {
 
     sql.begin().execute();
 
-    sql.createTable("Users", {
+    sql.createTable(...createTableTestSpec("Users", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
     sql
       .insertInto("Users", ["Id"])
@@ -878,12 +879,12 @@ it("does not modify committed database state", () => {
 
   sql.begin().execute();
 
-  sql.createTable("Users", {
+  sql.createTable(...createTableTestSpec("Users", {
     Id: {
       type: SQL_DECIMAL,
       nullable: false,
     },
-  }).execute();
+  })).execute();
 
   sql
     .insertInto("Users", ["Id"])
@@ -938,12 +939,12 @@ it("propagates unexpected errors", () => {
 
   sql.begin().execute();
 
-  sql.createTable("Users", {
+  sql.createTable(...createTableTestSpec("Users", {
     Id: {
       type: SQL_DECIMAL,
       nullable: false,
     },
-  }).execute();
+  })).execute();
 
   sql.commit().execute();
 

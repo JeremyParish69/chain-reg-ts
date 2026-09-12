@@ -13,6 +13,7 @@ import {
 export const POSTGRES_FRAGMENTS: Record<string, string> = {
   createTable: "createTable",
 
+  as: "as",
   insertInto: "insertInto",
   values: "values",
   returning: "returning",
@@ -33,6 +34,9 @@ export const POSTGRES_RULES: DialectRules = {
     supportsIfExists: true,
     supportsDeferrableConstraints: true,
     supportsInlineForeignKeys: true,
+    ctasColumnListOverridesQueryColumns: true,
+    ctasColumnListMustMatchQueryColumnCount: true,
+    ctasAllowsConstraints: false,
   },
 
   constraints: {

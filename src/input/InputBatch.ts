@@ -31,8 +31,7 @@ import {
 import type { UpdateInput } from "../types/UpdateInput.js";
 import type { RowView } from "../relational/RowView.js";
 import type { InsertInput } from "../types/InsertInput.js";
-import type { ExpressionNode } from "../ast/expression/ExpressionNode.js";
-import type { ColumnValue } from "../types/ColumnValue.js";
+import type { SelectInput } from "../types/SelectInput.js";
 
 export abstract class InputBatch {
   private statements: Statement[] = [];
@@ -158,18 +157,35 @@ export abstract class InputBatch {
 
   protected createTable(
     name: string,
-    columnSchema: Record<string, InlineColumnSpec>,
-    constraintSchema: Record<string, ConstraintSpec>,
+    columnList?: InlineColumnSpec[],
+    constraintList?: ConstraintSpec[],
     fragment: string = "CREATE TABLE",
   ) {
     this.assertAllowed("createTable", fragment);
     this.finalizePreviousStatement();
+
     this.currentBuilder = new CreateTableBuilder(
       name,
-      columnSchema,
-      constraintSchema,
+      columnList,
+      constraintList,
     );
-    this.finalizePreviousStatement();
+
+    this.pauseCurrentBuilder();
+
+    return this;
+  }
+
+  protected as(query: QueryStatement, fragment: string = "AS") {
+    this.currentBuilder = this.resumeBuilder();
+    this.assertAllowed("as", fragment);
+
+    if (!(this.currentBuilder instanceof CreateTableBuilder)) {
+      throw new Error(
+        `Cannot use '${fragment}' with a constructed query outside CREATE TABLE`,
+      );
+    }
+
+    this.currentBuilder.as(query);
     return this;
   }
 
@@ -243,15 +259,51 @@ export abstract class InputBatch {
   }
 
   protected addColumn(
-    columnName: string,
-    inlineColumnSpec: InlineColumnSpec,
+    columnList: InlineColumnSpec[],
     fragment: string = "ADD COLUMN",
   ) {
     this.assertAllowed("addColumn", fragment);
     if (!(this.currentBuilder instanceof AlterTableBuilder)) {
       throw new Error(`Cannot call '${fragment}' outside of AlterTable`);
     }
-    this.currentBuilder.addColumn(columnName, inlineColumnSpec);
+    this.currentBuilder.addColumn(columnList);
+    return this;
+  }
+
+  protected dropColumn(
+    columnNames: string[],
+    fragment: string = "DROP COLUMN",
+  ) {
+    this.assertAllowed("dropColumn", fragment);
+    if (!(this.currentBuilder instanceof AlterTableBuilder)) {
+      throw new Error(`Cannot call '${fragment}' outside of AlterTable`);
+    }
+    this.currentBuilder.dropColumn(columnNames);
+    return this;
+  }
+
+  protected renameColumn(
+    from: string,
+    to: string,
+    fragment: string = "RENAME COLUMN",
+  ) {
+    this.assertAllowed("renameColumn", fragment);
+    if (!(this.currentBuilder instanceof AlterTableBuilder)) {
+      throw new Error(`Cannot call '${fragment}' outside of AlterTable`);
+    }
+    this.currentBuilder.renameColumn(from, to);
+    return this;
+  }
+
+  protected alterColumn(
+    columnList: InlineColumnSpec[],
+    fragment: string = "ALTER COLUMN",
+  ) {
+    this.assertAllowed("alterColumn", fragment);
+    if (!(this.currentBuilder instanceof AlterTableBuilder)) {
+      throw new Error(`Cannot call '${fragment}' outside of AlterTable`);
+    }
+    this.currentBuilder.modifyColumn(columnList);
     return this;
   }
 
@@ -328,63 +380,15 @@ export abstract class InputBatch {
     return this;
   }
 
-  // protected select(query: QueryStatement, fragment: string = "SELECT") {
-  //   this.assertAllowed("select", fragment);
-  //   if (!(this.currentBuilder instanceof InsertIntoBuilder)) {
-  //     throw new Error(`Cannot call '${fragment}' outside of InsertInto`);
-  //   }
-  //   this.currentBuilder.select(query);
-  //   return this;
-  // }
-
-  // protected select(columns: string[] | "*", fragment: string = "SELECT") {
-  //   this.assertAllowed("select", fragment);
-  //   this.finalizePreviousStatement();
-  //   this.currentBuilder = new SelectBuilder(columns);
-  //   return this;
-  // }
-
-  // protected select(
-  //   columnsOrQuery: string[] | "*" | QueryStatement,
-  //   fragment: string = "SELECT",
-  // ) {
-  //   this.assertAllowed("select", fragment);
-
-  //   if (this.currentBuilder instanceof InsertIntoBuilder) {
-  //     if (!isQueryStatement(columnsOrQuery)) {
-  //       throw new Error(
-  //         `Cannot use '${fragment}' after insertInto() without a query statement`,
-  //       );
-  //     }
-
-  //     this.currentBuilder.select(columnsOrQuery);
-  //     return this;
-  //   }
-
-  //   this.finalizePreviousStatement();
-
-  //   if (isQueryStatement(columnsOrQuery)) {
-  //     throw new Error(
-  //       `Columns or "*" expected after SELECT.`,
-  //     );
-  //   }
-
-  //   this.currentBuilder = new SelectBuilder(columnsOrQuery);
-  //   return this;
-  // }
-
   protected select(
-    expressionsOrQuery: (ExpressionNode | ColumnValue)[] | "*" | QueryStatement,
+    expressionsOrQuery: SelectInput[] | "*" | QueryStatement,
     fragment: string = "SELECT",
   ) {
     if (isQueryStatement(expressionsOrQuery)) {
       this.currentBuilder = this.resumeBuilder();
       this.assertAllowed("select", fragment);
 
-      if (
-        !(this.currentBuilder instanceof InsertIntoBuilder) // &&
-        //!(this.currentBuilder instanceof CreateTableBuilder)
-      ) {
+      if (!(this.currentBuilder instanceof InsertIntoBuilder)) {
         throw new Error(
           `Cannot use '${fragment}' with a constructed query outside INSERT`,
         );
@@ -468,6 +472,10 @@ export abstract class InputBatch {
   }
 
   execute(): RowView[][] {
+    if (!this.currentBuilder && this.builderStack.length > 0) {
+      this.currentBuilder = this.resumeBuilder();
+    }
+
     this.finalizePreviousStatement();
 
     const resultIterators: RowView[][] = [];

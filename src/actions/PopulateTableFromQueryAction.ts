@@ -6,28 +6,25 @@ import type { ColumnInput } from "../types/ColumnInput.js";
 import type { Action } from "./Action.js";
 import { mapQueryRowsToInsertRows } from "./mapQueryRowsToInsertRows.js";
 
-export class InsertSelectAction implements Action {
+export class PopulateTableFromQueryAction implements Action {
   constructor(
     private dbName: string,
     private tableName: string,
-    private targetColumns: ColumnId[],
+    private targetColumns: string[],
     private queryPlan: QueryPlan,
   ) {}
 
   apply(databases: Databases) {
     const db = databases.requireByName(this.dbName);
-
     const table = db.tables.requireByName(this.tableName);
 
-    const columnIds: ColumnId[] = this.targetColumns
-      ? this.targetColumns
-      : this.queryPlan.columns.map((qc) =>
-          table.columns.requireIdByName(qc.name),
-        );
+    const columnIds: ColumnId[] = this.targetColumns.map((name) =>
+      table.columns.requireIdByName(name),
+    );
 
     if (this.queryPlan.columns.length !== this.targetColumns.length) {
       throw new Error(
-        "Query result column count does not match INSERT target column count.",
+        "Query result column count does not match target column count.",
       );
     }
 

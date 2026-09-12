@@ -3,6 +3,7 @@ import { createTestMySqlSql, createTestPostgresSql, createTestSqlServerSql, fres
 import { DEFAULT } from '../../src/dialect/keywords.ts';
 import { Dialect } from '../../src/dialect/Dialect.ts';
 import { SQL_DECIMAL, SQL_VARCHAR } from '../../src/types/SqlType.ts';
+import { createTableTestSpec } from '../utils/buildSchema.ts';
 
 describe("Integration::schema", () => {
   describe("ColumnPolicy", () => {
@@ -19,7 +20,7 @@ describe("Integration::schema", () => {
       sql.createDatabase("DB1").execute();
       sql.useDatabase("DB1").execute();
 
-      sql.createTable("Users", {
+      sql.createTable(...createTableTestSpec("Users", {
         Id: {
           type: SQL_DECIMAL,
           nullable: false,
@@ -30,7 +31,7 @@ describe("Integration::schema", () => {
           type: SQL_VARCHAR,
           nullable: false,
         },
-      }).execute();
+      })).execute();
 
       expect(() => {
         sql
@@ -53,7 +54,7 @@ describe("Integration::schema", () => {
       sql.createDatabase("DB1").execute();
       sql.useDatabase("DB1").execute();
 
-      sql.createTable("Users", {
+      sql.createTable(...createTableTestSpec("Users", {
         Id: {
           type: SQL_DECIMAL,
           nullable: false,
@@ -64,7 +65,7 @@ describe("Integration::schema", () => {
           type: SQL_VARCHAR,
           nullable: false,
         },
-      }).execute();
+      })).execute();
 
       expect(() => {
         sql
@@ -87,7 +88,7 @@ describe("Integration::schema", () => {
       sql.createDatabase("DB1").execute();
       sql.useDatabase("DB1").execute();
 
-      sql.createTable("Users", {
+      sql.createTable(...createTableTestSpec("Users", {
         Id: {
           type: SQL_DECIMAL,
           nullable: false,
@@ -98,7 +99,7 @@ describe("Integration::schema", () => {
           type: SQL_VARCHAR,
           nullable: false,
         },
-      }).execute();
+      })).execute();
 
       // New engine policy should not retroactively modify the existing column.
       engine.updatePolicy({
@@ -128,7 +129,7 @@ describe("Integration::schema", () => {
       sql.createDatabase("DB1").execute();
       sql.useDatabase("DB1").execute();
 
-      sql.createTable("Users", {
+      sql.createTable(...createTableTestSpec("Users", {
         Id: {
           type: SQL_DECIMAL,
           nullable: false,
@@ -137,7 +138,7 @@ describe("Integration::schema", () => {
           type: SQL_VARCHAR,
           nullable: false,
         },
-      }).execute();
+      })).execute();
 
       engine.updatePolicy({
         autoIncrementColumnPolicy: {
@@ -147,12 +148,13 @@ describe("Integration::schema", () => {
 
       sql
         .alterTable("Users")
-        .add("Sequence", {
+        .add([{
+          name: "Sequence",
           type: SQL_DECIMAL,
           nullable: false,
           autoIncrementStart: 1,
           autoIncrementStep: 1,
-        })
+        }])
         .execute();
 
       expect(() => {
@@ -176,7 +178,7 @@ describe("Integration::schema", () => {
       sql.createDatabase("DB1").execute();
       sql.useDatabase("DB1").execute();
 
-      sql.createTable("Users", {
+      sql.createTable(...createTableTestSpec("Users", {
         Id: {
           type: SQL_DECIMAL,
           nullable: false,
@@ -187,7 +189,7 @@ describe("Integration::schema", () => {
           type: SQL_VARCHAR,
           nullable: false,
         },
-      }).execute();
+      })).execute();
 
       expect(() => {
         sql
@@ -210,7 +212,7 @@ describe("Integration::schema", () => {
       sql.createDatabase("DB1").execute();
       sql.useDatabase("DB1").execute();
 
-      sql.createTable("Users", {
+      sql.createTable(...createTableTestSpec("Users", {
         Id: {
           type: SQL_DECIMAL,
           nullable: false,
@@ -221,7 +223,7 @@ describe("Integration::schema", () => {
           type: SQL_VARCHAR,
           nullable: false,
         },
-      }).execute();
+      })).execute();
 
       expect(() => {
         sql
@@ -244,7 +246,7 @@ describe("Integration::schema", () => {
       sql.createDatabase("DB1").execute();
       sql.useDatabase("DB1").execute();
 
-      sql.createTable("Users", {
+      sql.createTable(...createTableTestSpec("Users", {
         Id: {
           type: SQL_DECIMAL,
           nullable: false,
@@ -255,7 +257,7 @@ describe("Integration::schema", () => {
           type: SQL_VARCHAR,
           nullable: false,
         },
-      }).execute();
+      })).execute();
 
       engine.updatePolicy({
         autoIncrementColumnPolicy: {
@@ -284,7 +286,7 @@ describe("Integration::schema", () => {
       sql.createDatabase("DB1").execute();
       sql.useDatabase("DB1").execute();
 
-      sql.createTable("Users", {
+      sql.createTable(...createTableTestSpec("Users", {
         Id: {
           type: SQL_DECIMAL,
           nullable: false,
@@ -293,7 +295,7 @@ describe("Integration::schema", () => {
           type: SQL_VARCHAR,
           nullable: false,
         },
-      }).execute();
+      })).execute();
 
       engine.updatePolicy({
         autoIncrementColumnPolicy: {
@@ -303,12 +305,13 @@ describe("Integration::schema", () => {
 
       sql
         .alterTable("Users")
-        .add("Sequence", {
+        .add([{
+          name: "Sequence",
           type: SQL_DECIMAL,
           nullable: false,
           autoIncrementStart: 1,
           autoIncrementStep: 1,
-        })
+        }])
         .execute();
 
       expect(() => {
@@ -336,7 +339,7 @@ describe("Integration::schema", () => {
       sql.useDatabase("DB1").execute();
 
       expect(() => {
-        sql.createTable("Users", {
+        sql.createTable(...createTableTestSpec("Users", {
           Id: {
             type: SQL_DECIMAL,
             nullable: false,
@@ -349,7 +352,7 @@ describe("Integration::schema", () => {
             autoIncrementStart: 100,
             autoIncrementStep: 1,
           },
-        }).execute();
+        })).execute();
       }).not.toThrow();
     });
 
@@ -367,7 +370,7 @@ describe("Integration::schema", () => {
       sql.useDatabase("DB1").execute();
 
       expect(() => {
-        sql.createTable("Users", {
+        sql.createTable(...createTableTestSpec("Users", {
           Id: {
             type: SQL_DECIMAL,
             nullable: false,
@@ -380,7 +383,7 @@ describe("Integration::schema", () => {
             autoIncrementStart: 100,
             autoIncrementStep: 1,
           },
-        }).execute();
+        })).execute();
       }).toThrow();
     });
 
@@ -398,7 +401,7 @@ describe("Integration::schema", () => {
       sql.useDatabase("DB1").execute();
 
       expect(() => {
-        sql.createTable("Users", {
+        sql.createTable(...createTableTestSpec("Users", {
           Id: {
             type: SQL_DECIMAL,
             nullable: false,
@@ -409,7 +412,7 @@ describe("Integration::schema", () => {
             type: SQL_VARCHAR,
             nullable: false,
           },
-        }).execute();
+        })).execute();
       }).not.toThrow();
     });
 
@@ -426,7 +429,7 @@ describe("Integration::schema", () => {
       sql.createDatabase("DB1").execute();
       sql.useDatabase("DB1").execute();
 
-      sql.createTable("Users", {
+      sql.createTable(...createTableTestSpec("Users", {
         Id: {
           type: SQL_DECIMAL,
           nullable: false,
@@ -437,17 +440,18 @@ describe("Integration::schema", () => {
           type: SQL_VARCHAR,
           nullable: false,
         },
-      }).execute();
+      })).execute();
 
       expect(() => {
         sql
           .alterTable("Users")
-          .add("Sequence", {
+          .add([{
+            name: "Sequence",
             type: SQL_DECIMAL,
             nullable: false,
             autoIncrementStart: 100,
             autoIncrementStep: 1,
-          })
+          }])
           .execute();
       }).toThrow();
     });
@@ -465,7 +469,7 @@ describe("Integration::schema", () => {
       sql.createDatabase("DB1").execute();
       sql.useDatabase("DB1").execute();
 
-      sql.createTable("Users", {
+      sql.createTable(...createTableTestSpec("Users", {
         Id: {
           type: SQL_DECIMAL,
           nullable: false,
@@ -476,17 +480,18 @@ describe("Integration::schema", () => {
           type: SQL_VARCHAR,
           nullable: false,
         },
-      }).execute();
+      })).execute();
 
       expect(() => {
         sql
           .alterTable("Users")
-          .add("Sequence", {
+          .add([{
+            name: "Sequence",
             type: SQL_DECIMAL,
             nullable: false,
             autoIncrementStart: 100,
             autoIncrementStep: 1,
-          })
+          }])
           .execute();
       }).not.toThrow();
     });

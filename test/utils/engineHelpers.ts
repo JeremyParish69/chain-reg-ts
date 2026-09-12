@@ -24,17 +24,29 @@ export function createTestSql(engine?: Engine) {
 export function createTestPostgresSql(
   engine?: Engine,
 ): PostgresInputBatch {
-  return (engine ?? freshEngine()).input() as PostgresInputBatch;
+  if (engine && engine.dialect !== Dialect.Postgres) {
+    throw new Error(`Cannot create Batch with mismatching Engine: (${engine.dialect})`);
+  }
+  return (engine ?? freshEngine(Dialect.Postgres))
+    .input() as PostgresInputBatch;
 }
 
 export function createTestSqlServerSql(
   engine?: Engine,
 ): SqlServerInputBatch {
-  return (engine ?? freshEngine()).input() as SqlServerInputBatch;
+  if (engine && engine.dialect !== Dialect.SQLServer) {
+    throw new Error(`Cannot create Batch with mismatching Engine: (${engine.dialect})`);
+  }
+  return (engine ?? freshEngine(Dialect.SQLServer))
+    .input() as SqlServerInputBatch;
 }
 
 export function createTestMySqlSql(
   engine?: Engine,
 ): MySqlInputBatch {
-  return (engine ?? freshEngine()).input() as MySqlInputBatch;
+  if (engine && engine.dialect !== Dialect.MySQL) {
+    throw new Error(`Cannot create Batch with mismatching Engine: (${engine.dialect})`);
+  }
+  return (engine ?? freshEngine(Dialect.MySQL))
+    .input() as MySqlInputBatch;
 }

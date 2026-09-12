@@ -18,6 +18,9 @@ export interface DialectRules {
     supportsIfExists: boolean;
     supportsDeferrableConstraints: boolean;
     supportsInlineForeignKeys: boolean;
+    ctasColumnListOverridesQueryColumns: boolean;
+    ctasColumnListMustMatchQueryColumnCount: boolean;
+    ctasAllowsConstraints: boolean;
   };
 
   constraints: {

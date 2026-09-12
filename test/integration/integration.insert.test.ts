@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { createTestPostgresSql } from '../utils/engineHelpers.ts';
 import { col } from '../../src/ast/dsl.ts';
 import { SQL_DECIMAL, SQL_VARCHAR } from '../../src/types/SqlType.ts';
+import { createTableTestSpec } from '../utils/buildSchema.ts';
 
 describe("Integration::insert", () => {
   it("rejects duplicate primary keys", () => {
@@ -13,7 +14,7 @@ describe("Integration::insert", () => {
 
     sql.begin().execute();
 
-    sql.createTable("Users", {
+    sql.createTable(...createTableTestSpec("Users", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
@@ -23,7 +24,7 @@ describe("Integration::insert", () => {
         type: SQL_VARCHAR,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
     sql.commit().execute();
 
@@ -57,15 +58,15 @@ describe("Integration::insert", () => {
 
     sql.begin().execute();
 
-    sql.createTable("Users", {
+    sql.createTable(...createTableTestSpec("Users", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
         primaryKey: true,
       },
-    }).execute();
+    })).execute();
 
-    sql.createTable("Posts", {
+    sql.createTable(...createTableTestSpec("Posts", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
@@ -75,7 +76,7 @@ describe("Integration::insert", () => {
         type: SQL_DECIMAL,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
     sql.alterTable("Posts")
       .addConstraint("Posts_FK")
@@ -103,12 +104,12 @@ describe("Integration::insert", () => {
 
     sql.useDatabase("DB1").execute();
 
-    sql.createTable("Users", {
+    sql.createTable(...createTableTestSpec("Users", {
       Age: {
         type: SQL_DECIMAL,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
     sql.alterTable("Users")
       .addConstraint("CHK_Adult")
@@ -135,12 +136,12 @@ describe("Integration::insert", () => {
 
     sql.useDatabase("DB1").execute();
 
-    sql.createTable("Users", {
+    sql.createTable(...createTableTestSpec("Users", {
       Age: {
         type: SQL_DECIMAL,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
     sql.alterTable("Users")
       .addConstraint("CHK_Adult")
@@ -167,7 +168,7 @@ describe("Integration::insert", () => {
 
     sql.begin().execute();
 
-    sql.createTable("Employees", {
+    sql.createTable(...createTableTestSpec("Employees", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
@@ -177,7 +178,7 @@ describe("Integration::insert", () => {
         type: SQL_DECIMAL,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
     sql.alterTable("Employees")
       .addConstraint("FK1")
@@ -219,7 +220,7 @@ describe("Integration::insert", () => {
     sql.createDatabase("DB1").execute();
     sql.useDatabase("DB1").execute();
 
-    sql.createTable("Users", {
+    sql.createTable(...createTableTestSpec("Users", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
@@ -230,7 +231,7 @@ describe("Integration::insert", () => {
         nullable: false,
         defaultValue: "Anonymous",
       },
-    }).execute();
+    })).execute();
 
     sql
       .insertInto("Users", ["Id"])
@@ -256,7 +257,7 @@ describe("Integration::insert", () => {
     sql.createDatabase("DB1").execute();
     sql.useDatabase("DB1").execute();
 
-    sql.createTable("Users", {
+    sql.createTable(...createTableTestSpec("Users", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
@@ -267,7 +268,7 @@ describe("Integration::insert", () => {
         nullable: false,
         defaultValue: "Anonymous",
       },
-    }).execute();
+    })).execute();
 
     sql
       .insertInto("Users", ["Id", "Name"])
@@ -295,7 +296,7 @@ describe("Integration::insert", () => {
     sql.createDatabase("DB1").execute();
     sql.useDatabase("DB1").execute();
 
-    sql.createTable("Users", {
+    sql.createTable(...createTableTestSpec("Users", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
@@ -305,7 +306,7 @@ describe("Integration::insert", () => {
         type: SQL_VARCHAR,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
     sql
       .insertInto("Users", ["Id", "UpdatedAt"])
@@ -333,7 +334,7 @@ describe("Integration::insert", () => {
     sql.createDatabase("DB1").execute();
     sql.useDatabase("DB1").execute();
 
-    sql.createTable("Users", {
+    sql.createTable(...createTableTestSpec("Users", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
@@ -343,7 +344,7 @@ describe("Integration::insert", () => {
         type: SQL_VARCHAR,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
     sql
       .insertInto("Users", ["Id", "UpdatedAt"])
@@ -371,7 +372,7 @@ describe("Integration::insert", () => {
     sql.createDatabase("DB1").execute();
     sql.useDatabase("DB1").execute();
 
-    sql.createTable("Users", {
+    sql.createTable(...createTableTestSpec("Users", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
@@ -381,7 +382,7 @@ describe("Integration::insert", () => {
         type: SQL_VARCHAR,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
     expect(() =>
       sql
@@ -399,7 +400,7 @@ describe("Integration::insert", () => {
     sql.createDatabase("DB1").execute();
     sql.useDatabase("DB1").execute();
 
-    sql.createTable("Users", {
+    sql.createTable(...createTableTestSpec("Users", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
@@ -411,7 +412,7 @@ describe("Integration::insert", () => {
         type: SQL_VARCHAR,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
     sql
       .insertInto("Users", ["Id", "Name"])
@@ -452,7 +453,7 @@ describe("Integration::insertSelect", () => {
     sql.createDatabase("DB1").execute();
     sql.useDatabase("DB1").execute();
 
-    sql.createTable("Source", {
+    sql.createTable(...createTableTestSpec("Source", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
@@ -462,9 +463,9 @@ describe("Integration::insertSelect", () => {
         type: SQL_VARCHAR,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
-    sql.createTable("Destination", {
+    sql.createTable(...createTableTestSpec("Destination", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
@@ -474,7 +475,7 @@ describe("Integration::insertSelect", () => {
         type: SQL_VARCHAR,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
     sql
       .insertInto("Source", ["Id", "OldName"])
@@ -520,7 +521,7 @@ describe("Integration::insertSelect", () => {
     sql.createDatabase("DB1").execute();
     sql.useDatabase("DB1").execute();
 
-    sql.createTable("Source", {
+    sql.createTable(...createTableTestSpec("Source", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
@@ -530,9 +531,9 @@ describe("Integration::insertSelect", () => {
         type: SQL_VARCHAR,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
-    sql.createTable("Destination", {
+    sql.createTable(...createTableTestSpec("Destination", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
@@ -542,7 +543,7 @@ describe("Integration::insertSelect", () => {
         type: SQL_VARCHAR,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
     sql
       .insertInto("Source", ["Id", "OldName"])
@@ -588,7 +589,7 @@ describe("Integration::insertSelect", () => {
     sql.createDatabase("DB1").execute();
     sql.useDatabase("DB1").execute();
 
-    sql.createTable("Source", {
+    sql.createTable(...createTableTestSpec("Source", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
@@ -598,9 +599,9 @@ describe("Integration::insertSelect", () => {
         type: SQL_VARCHAR,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
-    sql.createTable("Destination", {
+    sql.createTable(...createTableTestSpec("Destination", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
@@ -610,7 +611,7 @@ describe("Integration::insertSelect", () => {
         type: SQL_VARCHAR,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
     sql
       .insertInto("Source", ["Id", "OldName"])
@@ -660,7 +661,7 @@ describe("Integration::insertSelect", () => {
     sql.createDatabase("DB1").execute();
     sql.useDatabase("DB1").execute();
 
-    sql.createTable("Source", {
+    sql.createTable(...createTableTestSpec("Source", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
@@ -670,9 +671,9 @@ describe("Integration::insertSelect", () => {
         type: SQL_VARCHAR,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
-    sql.createTable("Destination", {
+    sql.createTable(...createTableTestSpec("Destination", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
@@ -682,7 +683,7 @@ describe("Integration::insertSelect", () => {
         type: SQL_VARCHAR,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
     expect(() => {
       sql
@@ -705,7 +706,7 @@ describe("Integration::insertSelect", () => {
     sql.createDatabase("DB1").execute();
     sql.useDatabase("DB1").execute();
 
-    sql.createTable("Source", {
+    sql.createTable(...createTableTestSpec("Source", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
@@ -715,9 +716,9 @@ describe("Integration::insertSelect", () => {
         type: SQL_DECIMAL,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
-    sql.createTable("Destination", {
+    sql.createTable(...createTableTestSpec("Destination", {
       Id: {
         type: SQL_DECIMAL,
         nullable: false,
@@ -727,7 +728,7 @@ describe("Integration::insertSelect", () => {
         type: SQL_VARCHAR,
         nullable: false,
       },
-    }).execute();
+    })).execute();
 
     expect(() => {
       sql

@@ -13,10 +13,6 @@ Schema Inference
     ↓
 Database Builder
     ↓
-ImportPipelineResult
-    ↓
-Engine.install(...)
-    ↓
 Relational Database
     ↓
 Queries / Mutations
@@ -98,6 +94,16 @@ Mutations produce immutable `Action`s.
 Queries produce immutable `QueryPlan`s evaluated against relational snapshots and `RowView`s.
 
 Relational constraints enforce structural integrity during execution.
+
+---
+
+### DDL and Query-Based Table Creation
+
+DDL statements are analyzed semantically and converted into executable actions. `CREATE TABLE` may define columns and constraints explicitly, and supported dialects may also create and populate the table from a `SELECT` query (CTAS).
+
+For CTAS, Semantic analysis binds the query into a `QueryPlan`, derives destination column metadata from its `QueryColumn[]`, and combines that metadata with any explicit column definitions according to dialect rules. Table creation and query-result population remain separate actions so that the Relational layer does not need to know that the rows originated from a query.
+
+Dialect rules determine which CTAS forms are permitted, including whether explicit column lists must match the query column count and whether constraints are allowed.
 
 ---
 
